@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>AntentaFM</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <!--<script src="js/login.js"></script>-->
+    <script>
+        const id_checkbox_register = "checkbox_register";
+        const id_checkbox_password_change = "checkbox_password_change";
+        const id_form_password_old = "form_password_old";
+        const id_form_group_password_old = "form_group_password_old";
+        const id_form_password_register = "form_password_register";
+        const id_form_group_password_register = "form_group_password_register";
+        const id_button_submit = "button_submit";
+        const id_form_group_action = "form_group_action";
+        const id_form_action = "form_action";
+
+        function update_login_form() {
+            const cb_register = document.getElementById(id_checkbox_register);
+            const cb_password_change = document.getElementById(id_checkbox_password_change);
+
+            var button_submit = document.getElementById(id_button_submit);
+            var form_password_old = document.getElementById(id_form_password_old);
+            var form_group_password_old = document.getElementById(id_form_group_password_old);
+            var form_password_register = document.getElementById(id_form_password_register);
+            var form_group_password_register = document.getElementById(id_form_group_password_register);
+            var form_password_action = document.getElementById(id_form_action);
+            
+            var form_group_password_action = document.getElementById(id_form_group_action);
+            form_group_password_action.style.display = "none";
+
+            if (cb_register.checked) {
+                button_submit.innerHTML = "Registrieren";
+                form_group_password_old.style.display = "none";
+                form_password_old.disabled = true;
+                form_group_password_register.style.display = "block";
+                form_password_register.disabled = false;
+                form_password_action.value = "register";
+            } else if (cb_password_change.checked) {
+                button_submit.innerHTML = "Passwortänderung";
+                form_group_password_old.style.display = "block";
+                form_password_old.disabled = false;
+                form_group_password_register.style.display = "none";
+                form_password_register.disabled = true;
+                form_password_action.value="password_change";
+            } else {
+                button_submit.innerHTML = "Login";
+                form_group_password_old.style.display = "none";
+                form_password_old.disabled = true;
+                form_group_password_register.style.display = "none";
+                form_password_register.disabled = true;
+                form_password_action.value = "login";
+            }
+        }
+
+        function checkbox_handle_register() {
+            var cb_register = document.getElementById(id_checkbox_register);
+            
+            console.log("register value: ", cb_register.checked);
+
+            if (cb_register.checked) {
+                var cb_password_change = document.getElementById(id_checkbox_password_change);
+                cb_password_change.checked = false;
+            }
+
+            update_login_form();
+        }
+
+        function checkbox_handle_password_change() {
+            var cb_password_change = document.getElementById(id_checkbox_password_change);
+            
+            console.log("pw change value: ", cb_password_change.checked);
+
+            if (cb_password_change.checked) {
+                var cb_register = document.getElementById(id_checkbox_register);
+                cb_register.checked = false;
+            }
+
+            update_login_form();
+        }
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <p> </p>
+    <h4>Login</h4>
+    <form method="post">
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="username">Nutzer:</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" placeholder="Nutzer" name="username" required data-bs-toggle="tooltip" data-bs-placement="top" title="Nutzername [a-z,A-z,0-9]"> 
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="password">Passwort:</label>
+            <div class="col-sm-10">
+                <input type="password" class="form-control" placeholder="Passwort" name="password" required data-bs-toggle="tooltip" data-bs-placement="top" title="(neues) Passwort für Nutzer">
+            </div>
+        </div>
+        <div class="form-group" id="form_group_password_old">
+            <label class="control-label col-sm-2" for="password_old">Passwort Alt:</label>
+            <div class="col-sm-10">
+                <input type="password" class="form-control" placeholder="Passwort Alt" name="password_old" id="form_password_old" disabled data-bs-toggle="tooltip" data-bs-placement="top" title="altes Passwort von Nutzer">
+            </div>
+        </div>
+        <div class="form-group" id="form_group_password_register">
+            <label class="control-label col-sm-2" for="password_register"></label>Passwort Registrierung:</label>
+            <div class="col-sm-10">
+                <input type="password" class="form-control" placeholder="Einmal-Passwort Registrierung" name="password_register" id="form_password_register" disabled data-bs-toggle="tooltip" data-bs-placement="top" title="notwendiges Einmal-Passwort für Registrierung (=Passwort von vorherigen Website)">
+            </div>
+        </div>
+        <div class="form-group" id="form_group_action">
+            <label class="control-label col-sm-2" for="action"></label>Aktion</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" value="login" name="action" id="form_action">
+            </div>
+        </div>
+
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="checkbox_register" onclick="checkbox_handle_register()">
+            <label class="form-check-label" for="checkbox_register">
+                Registrierung
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="checkbox_password_change" onclick="checkbox_handle_password_change()">
+            <label class="form-check-label" for="checkbox_password_change">
+                Passwortänderung
+            </label>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn-default" id="button_submit">Login</button>
+            </div>
+        </div>
+
+        <script>update_login_form()</script>
+    </form>
+</div>
+
+
+</body>
+</html>
