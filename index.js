@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var axios = require('axios');
 var fs = require('fs');
+var path = require('path');
 
 var app = express();
 
@@ -22,8 +23,75 @@ app.get('/login', function (req, res) {
     fs.createReadStream('login.html').pipe(res);
 });
 
-function login(user, password) {
+function encode_base64(text) {
+    return Buffer.from(text).toString('base64');
+}
+
+function does_string_contain_only_valid_chars(text) {
+    return text.match("^[a-zA-Z0-9]+$");
+}
+
+function load_htpasswd_file() {  
+    content = null;
+
+    try {
+        content = fs.readFileSync(get_htpasswd_file_path(), 'utf8');
+    } catch(error) {
+        content = null;
+    }
+
+    return content
+}
+
+function get_htpasswd_file_path() {
+    const path_to_file = 'H:' + path.sep + 'develop' + path.sep + '.htpasswd';
+    return path_to_file;
+}
+
+function decode_users_and_passwords() {
+    var data_raw = load_htpasswd_file();
+    var users_db = {};
+    if (null == data_raw) {
+        return users_db;
+    }
+
+    data_raw = data_raw.replace(/[\r]/g, '');
+    const users_list = data_raw.split('\n');
+    users_list.forEach(function(user, index, array) {
+        user_password = user.split(':');
+        if (user_password.length == 2) {
+            users_db[user_password[0]] = user_password[1];
+        }
+    });
+
+    return users_db;
+}
+
+function encode_users_and_passwords(users_db) {
+    var text = '';
+
+    for (user in users_db) {
+        text += user + ':' + users_db[user] + '\r\n';
+    }
+
+    try {
+        fs.writeFileSync(get_htpasswd_file_path(), text);
+    } catch(error) {
+        return false;
+    }
+
     return true;
+}
+
+function login(user, password) {
+    const users_db = decode_users_and_passwords();
+
+    const password_base64 = encode_base64(password);
+    if ((user in users_db) && (users_db[user] == password_base64)) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 function change_password(user, password, req) {
@@ -32,7 +100,31 @@ function change_password(user, password, req) {
         return false;
     }
 
-    return true;
+    var users_db = decode_users_and_passwords();
+
+    const password_old_base64 = encode_base64(req.body['password_old']);
+    if (!((user in users_db) && (users_db[user] == password_old_base64))) {
+        return false;
+    }
+
+    users_db[user] = encode_base64(password);
+
+    if (!encode_users_and_passwords(users_db)) {
+        return false;
+    }
+
+    return login(user, password);
+}
+
+function check_user_password_combination(user, password, users_db) {
+    var is_valid = false;
+
+    const password_base64 = encode_base64(password);
+    if ((user in users_db) && (users_db[user] == password_base64)) {
+        is_valid = true;
+    }
+
+    return is_valid;
 }
 
 function register(user, password, req) {
@@ -41,7 +133,28 @@ function register(user, password, req) {
         return false;
     }
 
-    return true;
+    if (!does_string_contain_only_valid_chars(user)) {
+        return false;
+    }
+
+    var users_db = decode_users_and_passwords();
+
+    if (user in users_db) {
+        return false;
+    }
+
+    if (!check_user_password_combination('antentafm_register_pw', req.body['password_register'], users_db)) {
+        return false;
+    }
+
+    const password_base64 = encode_base64(password);
+    users_db[user] = password_base64;
+
+    if (!encode_users_and_passwords(users_db)) {
+        return false;
+    }
+
+    return login(user, password);
 }
 
 // receives login information
