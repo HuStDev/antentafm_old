@@ -1,9 +1,10 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var axios = require('axios');
-var fs = require('fs');
-var path = require('path');
-var crypto = require('crypto');
+const express = require('express');
+const bodyParser = require('body-parser');
+const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+const serve = require('serve-index');
 
 var app = express();
 
@@ -18,11 +19,8 @@ app.use((req, res, next) => {
     next();
 });
 
-// just render the form for the user authenticate with us
-app.get('/login', function (req, res) {
-    res.set('Content-Type', 'text/html');
-    fs.createReadStream('login.html').pipe(res);
-});
+app.use(express.static('C:\\Users\\hstra\\Documents\\develop'));
+app.use('/files', express.static('C:\\Users\\hstra\\Documents\\develop\\antentafm'), serve('C:\\Users\\hstra\\Documents\\develop\\antentafm', { 'icons': true }))
 
 function get_htpasswd_file_path() {
     //const path_to_file = 'H:' + path.sep + 'develop' + path.sep + '.htpasswd';
@@ -37,8 +35,17 @@ function encode_htpasswd(text) {
     return hash.digest('base64');
 }
 
+function create_html_basic_authentification(user, password) {
+    var response = user + ':' + password;
+    response = 'Basic ' + Buffer.from(response).toString('base64');
+
+    // Authorization: Basic aHVzdDptb25k
+
+    return response;
+}
+
 function does_string_contain_only_valid_chars(text) {
-    return text.match("^[a-zA-Z0-9]+$");
+    return text.match("^[a-zA-Z0-9]+$") && (text != '');
 }
 
 function load_htpasswd_file() {  
@@ -61,7 +68,7 @@ function load_users_and_passwords() {
     }
 
     data_raw = data_raw.replace(/[\r]/g, '');
-    data_raw = data_raw.replace(/[{SHA}]/g, '');
+    data_raw = data_raw.replace(/{SHA}/g, '');
     const users_list = data_raw.split('\n');
     users_list.forEach(function(user, index, array) {
         user_password = user.split(':');
@@ -90,7 +97,8 @@ function write_users_and_passwords(users_db) {
 }
 
 function is_user_password_combination_valid(user, password, users_db) {
-    if ((user in users_db) && (users_db[user] == encode_htpasswd(password))) {
+    const password_encoded = encode_htpasswd(password);
+    if ((user in users_db) && (users_db[user] == password_encoded)) {
         return true;
     } else {
         return false;
@@ -170,6 +178,69 @@ app.post('/login', function (req, res) {
     }
 
     return res.sendStatus(200);
+});
+
+// just render the form for the user authenticate with us
+app.get('/login', function (req, res) {
+
+    console.log(req.headers);
+    res.set('Content-Type', 'text/html');
+    fs.createReadStream('login.html').pipe(res);
+});
+
+app.post('/login_stream', function (req, res) {
+    // check for required data
+    if (!(req.body && ('action' in req.body))){
+        return res.sendStatus(401);
+    }
+
+    // check for unexpected action
+    const action = req.body['action'];
+    if ((action != 'mount_add') && (action != 'mount_remove') &&
+        (action != 'listener_add') && (action != 'listener_remove')) {
+        return res.sendStatus(401);
+    }
+
+    // perform no further checks for all actions except listener_add
+    if (action != 'listener_add') {
+        return res.sendStatus(200);
+    }
+
+    user = null;
+    password = null;
+    if ('mount' in req.body) {
+        var login_data = req.body['mount'].split('?');
+        if (login_data.length == 2) {
+            login_data = login_data[1].split('&');
+            if (login_data.length == 2) {
+                if (login_data[0].startsWith('username=')) {
+                    user = login_data[0].replace(/username=/g, '');
+                }
+                if (login_data[1].startsWith('password=')) {
+                    password = login_data[1].replace(/password=/g, '');
+                }
+            }
+        }
+    }
+
+    if ((user ==null) || (password == null)) {
+        if (!(('user' in req.body) && ('pass' in req.body))){
+            return res.sendStatus(401);
+        }
+
+        user = req.body['user'];
+        password = req.body['pass'];
+    }
+
+    // validate login
+    const users_db = load_users_and_passwords();
+    if (!is_user_password_combination_valid(user, password, users_db)) {
+        return res.sendStatus(401);
+    }
+
+    // create response header for icecase
+	res.setHeader('icecast-auth-user', '1');
+	return res.sendStatus(200);
 });
 
 app.listen(3030, function () {
