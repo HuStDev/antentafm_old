@@ -23,7 +23,7 @@
         const id_form_group_action = "form_group_action";
         const id_form_action = "form_action";
 
-        function set_default_checkbox_values() {
+        function set_default_form_values() {
             document.getElementById(id_checkbox_register).checked = false;
             document.getElementById(id_checkbox_password_change).checked = false;
         }
@@ -158,7 +158,7 @@
         </div>
 
         <script>
-            set_default_checkbox_values();
+            set_default_form_values();
             update_login_form();
         </script>
     </form>
@@ -182,12 +182,12 @@
                 data : post_data,
                 success:function(response, status, response_header) 
                 {
-                    //data: return data from server
-                    alert('Erfolgreich');
+                    window.location.pathname = '/';
                 },
                 error: function(response_header, status, error) 
                 {
-                    alert(response_header.responseJSON['status_message']);   
+                    alert(response_header.responseJSON['status_message']);
+                    set_default_form_values(); 
                 }
             });
 
