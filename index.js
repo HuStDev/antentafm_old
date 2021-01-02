@@ -25,11 +25,6 @@ app.use('/files', express.static('C:\\Users\\hstra\\Documents\\develop\\antentaf
 
 // receives login information
 app.post('/login', function (req, res) {
-    // check for required data
-    if (!(req.body && ('action' in req.body) && ('username' in req.body) && ('password' in req.body))) {
-        return res.sendStatus(401);
-    }
-
     const action = req.body['action'];
     var res_code = result.code.success;
     if ('login' == action) {
@@ -50,17 +45,14 @@ app.post('/login', function (req, res) {
         res_code = result.code.html_unexpected_header_information;
     }
 
-    if (!result.is_successful(res_code)) {
-        return res.sendStatus(401);
-    }
-
-    return res.sendStatus(200);
+    res.status(result.get_html_code(res_code)).send({
+        is_session_auth: true,
+        status_message: result.get_status_message(res_code)
+    });
 });
 
 // just render the form for the user authenticate with us
 app.get('/login', function (req, res) {
-
-    console.log(req.headers);
     res.set('Content-Type', 'text/html');
     fs.createReadStream('login.html').pipe(res);
 });

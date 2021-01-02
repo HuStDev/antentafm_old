@@ -105,7 +105,7 @@ function write_users_and_passwords(users_db) {
     try {
         fs.writeFileSync(configuration.path_to_user_db, text);
     } catch(error) {
-        return result.code.error_login_databaser;
+        return result.code.error_login_database;
     }
 
     return result.code.success;
