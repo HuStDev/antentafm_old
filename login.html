@@ -9,95 +9,10 @@
     <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
 
-    <!--<script src="js/login.js"></script>-->
     <script>
-        const id_form_password = "form_password";
-        const id_form_username = "form_username";
-        const id_checkbox_register = "checkbox_register";
-        const id_checkbox_password_change = "checkbox_password_change";
-        const id_form_password_old = "form_password_old";
-        const id_form_group_password_old = "form_group_password_old";
-        const id_form_password_register = "form_password_register";
-        const id_form_group_password_register = "form_group_password_register";
-        const id_button_submit = "button_submit";
-        const id_form_group_action = "form_group_action";
-        const id_form_action = "form_action";
-
-        function set_default_form_values() {
-            document.getElementById(id_checkbox_register).checked = false;
-            document.getElementById(id_checkbox_password_change).checked = false;
-        }
-
-        function update_login_form() {
-            const cb_register = document.getElementById(id_checkbox_register);
-            const cb_password_change = document.getElementById(id_checkbox_password_change);
-
-            var button_submit = document.getElementById(id_button_submit);
-            var form_password_old = document.getElementById(id_form_password_old);
-            var form_group_password_old = document.getElementById(id_form_group_password_old);
-            var form_password_register = document.getElementById(id_form_password_register);
-            var form_group_password_register = document.getElementById(id_form_group_password_register);
-            var form_password_action = document.getElementById(id_form_action);
-            
-            var form_group_password_action = document.getElementById(id_form_group_action);
-            form_group_password_action.style.display = "none";
-
-            if (cb_register.checked) {
-                button_submit.innerHTML = "Registrieren";
-                form_group_password_old.style.display = "none";
-                form_password_old.disabled = true;
-                form_group_password_register.style.display = "block";
-                form_password_register.disabled = false;
-                form_password_action.value = "register";
-            } else if (cb_password_change.checked) {
-                button_submit.innerHTML = "Passwortänderung";
-                form_group_password_old.style.display = "block";
-                form_password_old.disabled = false;
-                form_group_password_register.style.display = "none";
-                form_password_register.disabled = true;
-                form_password_action.value="password_change";
-            } else {
-                button_submit.innerHTML = "Login";
-                form_group_password_old.style.display = "none";
-                form_password_old.disabled = true;
-                form_group_password_register.style.display = "none";
-                form_password_register.disabled = true;
-                form_password_action.value = "login";
-            }
-        }
-
-        function checkbox_handle_register() {
-            var cb_register = document.getElementById(id_checkbox_register);
-            
-            console.log("register value: ", cb_register.checked);
-
-            if (cb_register.checked) {
-                var cb_password_change = document.getElementById(id_checkbox_password_change);
-                cb_password_change.checked = false;
-            }
-
-            update_login_form();
-        }
-
-        function checkbox_handle_password_change() {
-            var cb_password_change = document.getElementById(id_checkbox_password_change);
-            
-            console.log("pw change value: ", cb_password_change.checked);
-
-            if (cb_password_change.checked) {
-                var cb_register = document.getElementById(id_checkbox_register);
-                cb_register.checked = false;
-            }
-
-            update_login_form();
-        }
-
-        function save_cookie_information() {
-            var d = new Date();
-            d.setTime(d.getTime() + (365*24*60*60*1000));
-            var expires = "expires="+ d.toUTCString();
-            document.cookie = "antenta_fm_cookie_accepted=1;" + expires;
-        }
+        jQuery(document).ready(function($) {
+            window.history.replaceState({}, document.title, "/");
+        });
     </script>
 </head>
 <body>
@@ -156,47 +71,137 @@
                 <button type="submit" class="btn-default" id="button_submit">Login</button>
             </div>
         </div>
-
-        <script>
-            set_default_form_values();
-            update_login_form();
-        </script>
     </form>
 
     <script>
-        $("#form_post_id").submit(function(e)
-        {
-            const post_url = window.location.href;
+        // Identifier for form elements
+        const id_form_password = "form_password";
+        const id_form_username = "form_username";
+        const id_checkbox_register = "checkbox_register";
+        const id_checkbox_password_change = "checkbox_password_change";
+        const id_form_password_old = "form_password_old";
+        const id_form_group_password_old = "form_group_password_old";
+        const id_form_password_register = "form_password_register";
+        const id_form_group_password_register = "form_group_password_register";
+        const id_button_submit = "button_submit";
+        const id_form_group_action = "form_group_action";
+        const id_form_action = "form_action";
+
+        function set_default_form_values() {
+            document.getElementById(id_checkbox_register).checked = false;
+            document.getElementById(id_checkbox_password_change).checked = false;
+        }
+
+        function update_login_form() {
+            const cb_register = document.getElementById(id_checkbox_register);
+            const cb_password_change = document.getElementById(id_checkbox_password_change);
+
+            var button_submit = document.getElementById(id_button_submit);
+            var form_password_old = document.getElementById(id_form_password_old);
+            var form_group_password_old = document.getElementById(id_form_group_password_old);
+            var form_password_register = document.getElementById(id_form_password_register);
+            var form_group_password_register = document.getElementById(id_form_group_password_register);
+            var form_password_action = document.getElementById(id_form_action);
+            
+            var form_group_password_action = document.getElementById(id_form_group_action);
+            form_group_password_action.style.display = "none";
+
+            // Display elements based on checkbox selection
+            if (cb_register.checked) {
+                button_submit.innerHTML = "Registrieren";
+                form_group_password_old.style.display = "none";
+                form_password_old.disabled = true;
+                form_group_password_register.style.display = "block";
+                form_password_register.disabled = false;
+                form_password_action.value = "register";
+            } else if (cb_password_change.checked) {
+                button_submit.innerHTML = "Passwortänderung";
+                form_group_password_old.style.display = "block";
+                form_password_old.disabled = false;
+                form_group_password_register.style.display = "none";
+                form_password_register.disabled = true;
+                form_password_action.value="password_change";
+            } else {
+                button_submit.innerHTML = "Login";
+                form_group_password_old.style.display = "none";
+                form_password_old.disabled = true;
+                form_group_password_register.style.display = "none";
+                form_password_register.disabled = true;
+                form_password_action.value = "login";
+            }
+        }
+
+        function checkbox_handle_register() {
+            var cb_register = document.getElementById(id_checkbox_register);
+            
+            // Deselect password change, if register is selected
+            if (cb_register.checked) {
+                var cb_password_change = document.getElementById(id_checkbox_password_change);
+                cb_password_change.checked = false;
+            }
+
+            update_login_form();
+        }
+
+        function checkbox_handle_password_change() {
+            var cb_password_change = document.getElementById(id_checkbox_password_change);
+
+            // Deselect register, if password chagne is selected
+            if (cb_password_change.checked) {
+                var cb_register = document.getElementById(id_checkbox_register);
+                cb_register.checked = false;
+            }
+
+            update_login_form();
+        }
+
+        function post_login_data() {
             const post_data = {
                 username : document.getElementById(id_form_username).value,
                 password : document.getElementById(id_form_password).value,
                 password_old : document.getElementById(id_form_password_old).value,
                 password_register : document.getElementById(id_form_password_register).value,
-                action : document.getElementById(id_form_action).value
+                action : document.getElementById(id_form_action).value,
+                x_auth_token : sessionStorage.getItem('x_auth_token')
             };
 
             $.ajax(
             {
-                url : post_url,
-                type: "POST",
+                url : window.location.origin + '/login',
+                type : "POST",
                 data : post_data,
-                success:function(response, status, response_header) 
-                {
-                    window.location.pathname = '/';
+                success: function(response) {
+                    // In case of valid response, store auth token in session data and load root with query of auth token
+                    sessionStorage.setItem('x_auth_token', response['x_auth_token']);
+                    window.location.href = '/?x_auth_token=' + response['x_auth_token'];
                 },
-                error: function(response_header, status, error) 
-                {
+                error : function(response_header) {
+                    // In case of error, remove auth token from session storage, post error and reload form
+                    sessionStorage.removeItem('x_auth_token');
                     alert(response_header.responseJSON['status_message']);
-                    set_default_form_values(); 
+
+                    set_default_form_values();
+                    update_login_form();
+                    window.location.href = '/login';
                 }
             });
+        }
 
+        set_default_form_values();
+        update_login_form();
+
+        // IF an auth token is stored in session data, try to login
+        if (sessionStorage.getItem('x_auth_token') != null) {
+            post_login_data();
+        }
+
+        $("#form_post_id").submit(function(e)
+        {
+            post_login_data();
             e.preventDefault(); //STOP default action
-            //e.unbind();
         });
     </script>
 </div>
-
 
 </body>
 </html>

@@ -6,6 +6,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const serve = require('serve-index');
+const hist = require('history');
 
 var app = express();
 
@@ -23,38 +24,71 @@ app.use((req, res, next) => {
 app.use(express.static('C:\\Users\\hstra\\Documents\\develop'));
 app.use('/files', express.static('C:\\Users\\hstra\\Documents\\develop\\antentafm'), serve('C:\\Users\\hstra\\Documents\\develop\\antentafm', { 'icons': true }))
 
-// receives login information
-app.post('/login', function (req, res) {
+function send_login_response(res, res_code, session_token) {
+    const data = {
+        status_message : result.get_status_message(res_code),
+        x_auth_token : session_token
+    };
+    res.status(result.get_html_code(res_code)).send(data);
+}
+
+function login_by_token(req, res) {
+    var session_token = req.body['x_auth_token'];
+
+    var res_code = result.code.success;
+    if (!login.verify_session_token(session_token)) {
+        res_code = result.code.error_login_token_invalid;
+        session_token = null;
+    }
+
+    send_login_response(res, res_code, session_token);
+}
+
+function login_by_credentials(req, res) {
     const action = req.body['action'];
     var res_code = result.code.success;
     if ('login' == action) {
         res_code = login.login(req.body['username'], req.body['password']);
     } else if ('register' == action) {
-        if ('password_register' in req.body) {
-            res_code = login.register(req.body['username'], req.body['password'], req.body['password_register']);
-        } else {
-            is_successful = result.code.html_header_info_missing;
-        }
+        res_code = login.register(req.body['username'], req.body['password'], req.body['password_register']);
     } else if ('password_change' == action) {
-        if ('password_old' in req.body) {
-            res_code = login.change_password(req.body['username'], req.body['password'], req.body['password_old']);
-        } else {
-            res_code = result.code.html_header_info_missing;
-        }
+        res_code = login.change_password(req.body['username'], req.body['password'], req.body['password_old']);
     } else {
         res_code = result.code.html_unexpected_header_information;
     }
 
-    res.status(result.get_html_code(res_code)).send({
-        is_session_auth: true,
-        status_message: result.get_status_message(res_code)
-    });
+    session_token = null;
+    if (result.is_successful(res_code)) {
+        session_token = login.create_session_token(req.body['username'], req.body['password']);
+    };
+
+    send_login_response(res, res_code, session_token);
+}
+
+// receives login information
+app.post('/login', function (req, res) {
+    const x_auth_token = req.body['x_auth_token'];
+    if (x_auth_token) {
+        login_by_token(req, res);
+    } else {
+        login_by_credentials(req, res);
+    }
 });
 
 // just render the form for the user authenticate with us
 app.get('/login', function (req, res) {
     res.set('Content-Type', 'text/html');
     fs.createReadStream('login.html').pipe(res);
+});
+
+app.get('/', function (req, res) {  
+    const is_session_valid = login.verify_session_token(req.query['x_auth_token']);
+    if (!is_session_valid) {
+        return res.redirect('/login');
+    }
+
+    res.set('Content-Type', 'text/html');
+    fs.createReadStream('index.html').pipe(res);
 });
 
 app.post('/login_stream', function (req, res) {

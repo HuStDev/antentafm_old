@@ -7,6 +7,9 @@ exports.code = {
     error_login_user_already_exists : 102,
     error_login_invalid_user_name: 103,
     error_login_database : 104,
+    error_login_token_invalid : 105,
+    note_login_registered : 110,
+    note_login_password_changed: 111,
     //
     error_html_header_information_missing : 200,
     error_html_unexpected_header_information : 201
@@ -32,6 +35,12 @@ exports.get_html_code = function(result) {
     } else if (result == this.code.error_login_user_already_exists) {
         code = 401;
     } else if (result == this.code.error_login_user_is_unknown) {
+        code = 401;
+    } else if (result == this.code.error_login_token_invalid) {
+        code = 401;
+    } else if (result == this.code.note_login_registered) {
+        code = 401;
+    } else if (result == this.code.note_login_password_changed) {
         code = 401;
     } else if (result == this.code.error_html_header_information_missing) {
         code = 400;
@@ -61,6 +70,12 @@ exports.get_status_message = function(result) {
         message = 'Nutzer existiert bereits';
     } else if (result == this.code.error_login_user_is_unknown) {
         message = 'Nutzer unbekannt';
+    } else if (result == this.code.error_login_token_invalid) {
+        message = 'Session Tolen ungültig';
+    } else if (result == this.code.note_login_registered) {
+        message = 'Nutzer wurde regestriert';
+    } else if (result == this.code.note_login_password_changed) {
+        message = 'Passwort wurde geändert';
     } else if (result == this.code.error_html_header_information_missing) {
         message = 'Fehlender HTML Headerinformation';
     } else if (result == this.code.error_html_unexpected_header_information) {

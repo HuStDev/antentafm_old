@@ -4,6 +4,7 @@ const result = require('.' + path.sep + 'result');
 
 const fs = require('fs');
 const crypto = require('crypto');
+const jwt = require("jsonwebtoken");
 
 //-----------------------------------------------------------------------------
 // exported functions
@@ -16,12 +17,18 @@ exports.login = function login(user, password) {
 exports.change_password = function change_password(user, password, password_old) {
     var users_db = load_users_and_passwords();
 
-    const res = is_user_password_combination_valid(user, password_old, users_db);
+    var res = is_user_password_combination_valid(user, password_old, users_db);
     if (!result.is_successful(res)) {
         return res;
     }
 
-    return update_and_write_users_db(user, password, users_db);
+    res = update_and_write_users_db(user, password, users_db);
+
+    if (result.is_successful(res)) {
+        return result.code.note_login_password_changed;
+    }
+
+    return res;
 }
 
 exports.register = function register(user, password, password_register) {
@@ -40,12 +47,90 @@ exports.register = function register(user, password, password_register) {
         return res;
     }
 
-    return update_and_write_users_db(user, password, users_db);
+    res = update_and_write_users_db(user, password, users_db);
+
+    if (result.is_successful(res)) {
+        return result.code.note_login_registered;
+    }
+
+    return res;
+}
+
+exports.create_session_token = function create_session_token(user, password) {
+    const payload = {
+        user: user,
+        password: encode(password),
+        session_password: get_session_password()
+    };
+
+    const options = {
+        expiresIn: 60*60*24 //24h
+        //algorithm: 'RS384'
+    };
+
+    const session_token = jwt.sign(payload, configuration.secret_key, options);
+
+    return session_token;
+}
+
+exports.verify_session_token = function verify_session_token(session_token) {
+    if (!session_token) {
+        return false;
+    }
+
+    const decoded = jwt.verify(session_token, configuration.secret_key);
+
+    const session_password = get_session_password();
+    const is_valid_session_password = decoded['session_password'] == get_session_password();
+
+    const datetime = Date.now() / 1000;
+    const is_expired = datetime > decoded['exp'];
+
+    if (is_valid_session_password && decoded['exp'] && !is_expired) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 //-----------------------------------------------------------------------------
 // private functions
 //-----------------------------------------------------------------------------
+
+function get_session_password() {
+    const date_time = new Date();
+    const month = date_time.getUTCMonth() + 1; //months from 1-12
+    const day = date_time.getUTCDate();
+
+    const value = day * month;
+
+    return value;
+}
+
+function encode(value) {
+    let iv = crypto.randomBytes(16);
+    let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(configuration.secret_key), iv);
+
+    let encrypted = cipher.update(value);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+   
+    encrypted = iv.toString('hex') + ':' + encrypted.toString('hex');
+    return encrypted;
+}
+
+function decode(value) {
+    let textParts = text.split(':');
+    let iv = Buffer.from(textParts.shift(), 'hex');
+
+    let encryptedText = Buffer.from(textParts.join(':'), 'hex');
+
+    let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(configuration.secret_key), iv);
+    let decrypted = decipher.update(encryptedText);
+   
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+   
+    return decrypted.toString();
+}
 
 function encode_htpasswd(text) {
     var hash = crypto.createHash("sha1");
