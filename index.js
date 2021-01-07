@@ -6,7 +6,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const serve = require('serve-index');
-const hist = require('history');
 
 var app = express();
 
@@ -23,6 +22,8 @@ app.use((req, res, next) => {
 
 app.use(express.static('C:\\Users\\hstra\\Documents\\develop'));
 app.use('/files', express.static('C:\\Users\\hstra\\Documents\\develop\\antentafm'), serve('C:\\Users\\hstra\\Documents\\develop\\antentafm', { 'icons': true }))
+
+app.use('/scripts', express.static('.' + path.sep + 'scripts'), serve('.' + path.sep + 'scripts', { 'icons': true }))
 
 function send_login_response(res, res_code, session_token) {
     const data = {
@@ -91,59 +92,60 @@ app.get('/', function (req, res) {
     fs.createReadStream('index.html').pipe(res);
 });
 
-app.post('/login_stream', function (req, res) {
-    // check for required data
-    if (!(req.body && ('action' in req.body))){
-        return res.sendStatus(401);
+function login_stream_by_token(session_token, req, res) {
+    var res_code = result.code.success;
+    if (!login.verify_session_token(session_token)) {
+        res_code = result.code.error_login_token_invalid;
     }
 
-    // check for unexpected action
-    const action = req.body['action'];
-    if ((action != 'mount_add') && (action != 'mount_remove') &&
-        (action != 'listener_add') && (action != 'listener_remove')) {
-        return res.sendStatus(401);
-    }
-
-    // perform no further checks for all actions except listener_add
-    if (action != 'listener_add') {
+    if (result.is_successful(res_code)){
+        res.setHeader('icecast-auth-user', '1');
         return res.sendStatus(200);
+    } else {
+        return res.sendStatus(401);
     }
+}
 
-    user = null;
-    password = null;
+function login_stream_by_credentials(req, res) {
+    const res_code = login.login(req.body['user'], req.body['pass']);
+
+    if (result.is_successful(res_code)){
+        res.setHeader('icecast-auth-user', '1');
+        return res.sendStatus(200);
+    } else {
+        return res.sendStatus(401);
+    }
+}
+
+function get_session_token_from_login_stream(req) {
+    var session_token = null;
+
     if ('mount' in req.body) {
-        var login_data = req.body['mount'].split('?');
-        if (login_data.length == 2) {
-            login_data = login_data[1].split('&');
-            if (login_data.length == 2) {
-                if (login_data[0].startsWith('username=')) {
-                    user = login_data[0].replace(/username=/g, '');
-                }
-                if (login_data[1].startsWith('password=')) {
-                    password = login_data[1].replace(/password=/g, '');
+        var tmp = req.body['mount'].split('?');
+        if (tmp.length == 2) {
+            tmp = tmp[1].split('=');
+            if (tmp.length == 2) {
+                if (tmp[0] == 'x_auth_token') {
+                    session_token = tmp[1];
                 }
             }
         }
     }
 
-    if ((user ==null) || (password == null)) {
-        if (!(('user' in req.body) && ('pass' in req.body))){
-            return res.sendStatus(401);
-        }
+    return session_token;
+}
 
-        user = req.body['user'];
-        password = req.body['pass'];
-    }
-
-    // validate login
-    const users_db = load_users_and_passwords();
-    if (!is_user_password_combination_valid(user, password, users_db)) {
+app.post('/login_stream', function (req, res) {
+    if (req.body['action'] != 'listener_add') {
         return res.sendStatus(401);
     }
 
-    // create response header for icecase
-	res.setHeader('icecast-auth-user', '1');
-	return res.sendStatus(200);
+    const session_token = get_session_token_from_login_stream(req);
+    if (session_token) {
+        login_stream_by_token(session_token, req, res);
+    } else {
+        login_stream_by_credentials(req, res);
+    }
 });
 
 app.listen(3030, function () {
