@@ -55,7 +55,6 @@
 
 </div>
 
-<!--
 <div class="container-fluid rounded-lg" style="background-color:#dfdef6;" id="id_chat">
     <h3>Chat</h3>
     
@@ -66,18 +65,26 @@
     <div class="row mb-3" style="background-color:#dfdef6;" id="id_live_stats">
         <div class="col-sm-10 themed-grid-col embed-responsive embed-responsive-21by9" style="background-color:#dfdef6;">
             <iframe id="id_chat_frame" src="https://chat.antentafm.ddnss.de/channel/antentafm?layout=embedded"></iframe>
+            <script>   
+                const post_data = {
+                    x_auth_token : sessionStorage.getItem('x_auth_token')
+                };
 
-            <script>    
-                //window.addEventListener('message', function(e) {
-                //    if (('new-message' == e.data.eventName) || ('notification' == e.data.eventName))
-                //    {
-                //        console.log(e.data.eventName); // event name
-                //        console.log(e.data.data); // event data
-                //    }
-                //});
-                //
-                //window.onload = function () {
-                //};
+                $.ajax(
+                {
+                    url : window.location.origin + '/login_chat',
+                    type : "POST",
+                    data : post_data,
+                    success: function(response) {
+                        document.getElementById('id_chat_frame').contentWindow.postMessage(
+                            {
+                                event: 'login-with-token',
+                                loginToken: response['chat_auth_token']
+                            },
+                            'https://chat.antentafm.ddnss.de'
+                        );
+                    }
+                });
             </script>
         </div>
         
@@ -97,7 +104,6 @@
         </div>
     </div>
 </div>
--->
 
   
 <div class="container-fluid rounded-lg" style="background-color:#dfdef6;" id="id_replay">

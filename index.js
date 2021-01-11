@@ -6,6 +6,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const serve = require('serve-index');
+var axios = require('axios');
 
 var app = express();
 
@@ -37,7 +38,7 @@ function login_by_token(req, res) {
     var session_token = req.body['x_auth_token'];
 
     var res_code = result.code.success;
-    if (!login.verify_session_token(session_token)) {
+    if (null == login.verify_session_token(session_token)) {
         res_code = result.code.error_login_token_invalid;
         session_token = null;
     }
@@ -83,8 +84,7 @@ app.get('/login', function (req, res) {
 });
 
 app.get('/', function (req, res) {  
-    const is_session_valid = login.verify_session_token(req.query['x_auth_token']);
-    if (!is_session_valid) {
+    if (null == login.verify_session_token(req.query['x_auth_token'])) {
         return res.redirect('/login');
     }
 
@@ -94,7 +94,7 @@ app.get('/', function (req, res) {
 
 function login_stream_by_token(session_token, req, res) {
     var res_code = result.code.success;
-    if (!login.verify_session_token(session_token)) {
+    if (null == login.verify_session_token(session_token)) {
         res_code = result.code.error_login_token_invalid;
     }
 
@@ -145,6 +145,44 @@ app.post('/login_stream', function (req, res) {
         login_stream_by_token(session_token, req, res);
     } else {
         login_stream_by_credentials(req, res);
+    }
+});
+
+function send_login_chat_response(res, res_code, session_token) {
+    const data = {
+        status_message : result.get_status_message(res_code),
+        chat_auth_token : session_token
+    };
+    res.status(result.get_html_code(res_code)).send(data);
+}
+
+function login_chat_by_token(req, res) {
+    var session_token = req.body['x_auth_token'];
+
+    const session_data = login.verify_session_token(session_token);
+    if (null == session_data) {
+        send_login_chat_response(res, result.code.error_html_header_information_missing, null);
+    }
+
+    const pass = login.decode(session_data['password']);
+	axios.post('https://chat.antentafm.ddnss.de/api/v1/login', {
+		username: String(session_data['user']),
+		password: String(pass)
+	}).then(function(response) {
+		if (response.data.status === 'success') {
+            send_login_chat_response(res, result.code.success, response.data.data.authToken );
+		}
+	}).catch(function (error) {
+		send_login_chat_response(res, result.code.error_login_token_invalid, null);
+	});
+}
+
+app.post('/login_chat', function (req, res) {
+    const x_auth_token = req.body['x_auth_token'];
+    if (x_auth_token) {
+        login_chat_by_token(req, res);
+    } else {
+        send_login_chat_response(res, result.code.error_html_header_information_missing, null);
     }
 });
 

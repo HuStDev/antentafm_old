@@ -59,7 +59,7 @@ exports.register = function register(user, password, password_register) {
 exports.create_session_token = function create_session_token(user, password) {
     const payload = {
         user: user,
-        password: encode(password),
+        password: this.encode(password),
         session_password: get_session_password()
     };
 
@@ -87,10 +87,39 @@ exports.verify_session_token = function verify_session_token(session_token) {
     const is_expired = datetime > decoded['exp'];
 
     if (is_valid_session_password && decoded['exp'] && !is_expired) {
-        return true;
+        return decoded;
     } else {
-        return false;
+        return null;
     }
+}
+
+exports.encode = function encode(value) {
+    let iv = crypto.randomBytes(16);
+    let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(configuration.secret_key), iv);
+
+    let encrypted = cipher.update(value);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+   
+    encrypted = iv.toString('hex') + ':' + encrypted.toString('hex');
+    return encrypted;
+}
+
+exports.decode = function decode(value) {
+    if (!value) {
+        return ''
+    }
+
+    let textParts = value.split(':');
+    let iv = Buffer.from(textParts.shift(), 'hex');
+
+    let encryptedText = Buffer.from(textParts.join(':'), 'hex');
+
+    let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(configuration.secret_key), iv);
+    let decrypted = decipher.update(encryptedText);
+   
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+   
+    return decrypted.toString();
 }
 
 //-----------------------------------------------------------------------------
@@ -105,31 +134,6 @@ function get_session_password() {
     const value = day * month;
 
     return value;
-}
-
-function encode(value) {
-    let iv = crypto.randomBytes(16);
-    let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(configuration.secret_key), iv);
-
-    let encrypted = cipher.update(value);
-    encrypted = Buffer.concat([encrypted, cipher.final()]);
-   
-    encrypted = iv.toString('hex') + ':' + encrypted.toString('hex');
-    return encrypted;
-}
-
-function decode(value) {
-    let textParts = text.split(':');
-    let iv = Buffer.from(textParts.shift(), 'hex');
-
-    let encryptedText = Buffer.from(textParts.join(':'), 'hex');
-
-    let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(configuration.secret_key), iv);
-    let decrypted = decipher.update(encryptedText);
-   
-    decrypted = Buffer.concat([decrypted, decipher.final()]);
-   
-    return decrypted.toString();
 }
 
 function encode_htpasswd(text) {
