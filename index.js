@@ -6,7 +6,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const serve = require('serve-index');
-var axios = require('axios');
+const axios = require('axios');
 
 var app = express();
 
@@ -26,14 +26,6 @@ app.use('/files', express.static('C:\\Users\\hstra\\Documents\\develop\\antentaf
 
 app.use('/scripts', express.static('.' + path.sep + 'scripts'), serve('.' + path.sep + 'scripts', { 'icons': true }))
 
-function send_login_response(res, res_code, session_token) {
-    const data = {
-        status_message : result.get_status_message(res_code),
-        x_auth_token : session_token
-    };
-    res.status(result.get_html_code(res_code)).send(data);
-}
-
 function login_by_token(req, res) {
     var session_token = req.body['x_auth_token'];
 
@@ -43,28 +35,20 @@ function login_by_token(req, res) {
         session_token = null;
     }
 
-    send_login_response(res, res_code, session_token);
+    login.send_login_response(res, res_code, session_token);
 }
 
 function login_by_credentials(req, res) {
     const action = req.body['action'];
-    var res_code = result.code.success;
     if ('login' == action) {
-        res_code = login.login(req.body['username'], req.body['password']);
+        login.login(res, req.body['username'], req.body['password']);
     } else if ('register' == action) {
-        res_code = login.register(req.body['username'], req.body['password'], req.body['password_register']);
+        login.register(res, req.body['username'], req.body['password'], req.body['password_register']);
     } else if ('password_change' == action) {
-        res_code = login.change_password(req.body['username'], req.body['password'], req.body['password_old']);
+        login.change_password(res, req.body['username'], req.body['password'], req.body['password_old']);
     } else {
-        res_code = result.code.html_unexpected_header_information;
+        login.send_login_response(res, result.code.html_unexpected_header_information, null);
     }
-
-    session_token = null;
-    if (result.is_successful(res_code)) {
-        session_token = login.create_session_token(req.body['username'], req.body['password']);
-    };
-
-    send_login_response(res, res_code, session_token);
 }
 
 // receives login information
@@ -165,17 +149,22 @@ function login_chat_by_token(req, res) {
     }
 
     const pass = login.decode(session_data['password']);
-	axios.post('https://chat.antentafm.ddnss.de/api/v1/login', {
-		username: String(session_data['user']),
-		password: String(pass)
-	}).then(function(response) {
-		if (response.data.status === 'success') {
+    axios.post('https://chat.antentafm.ddnss.de/api/v1/login', {
+        username: String(session_data['user']),
+        password: String(pass)
+    }).then(function(response) {
+        if (response.data.status === 'success') {
             send_login_chat_response(res, result.code.success, response.data.data.authToken );
-		}
-	}).catch(function (error) {
-		send_login_chat_response(res, result.code.error_login_token_invalid, null);
-	});
+        }
+    }).catch(function (error) {
+        send_login_chat_response(res, result.code.error_login_token_invalid, null);
+    });
 }
+
+app.get('/login_chat', function (req, res) {
+    res.set('Content-Type', 'text/html');
+    fs.createReadStream('login.html').pipe(res);
+});
 
 app.post('/login_chat', function (req, res) {
     const x_auth_token = req.body['x_auth_token'];

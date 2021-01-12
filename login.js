@@ -5,55 +5,104 @@ const result = require('.' + path.sep + 'result');
 const fs = require('fs');
 const crypto = require('crypto');
 const jwt = require("jsonwebtoken");
+const axios = require('axios');
+const https = require('https');
 
 //-----------------------------------------------------------------------------
 // exported functions
 //-----------------------------------------------------------------------------
-exports.login = function login(user, password) {
+exports.login = function login(res, user, password) {
     const users_db = load_users_and_passwords();
-    return is_user_password_combination_valid(user, password, users_db);
+    const res_code = is_user_password_combination_valid(user, password, users_db);
+
+    session_token = null;
+    if (result.is_successful(res_code)) {
+        session_token = login.create_session_token(user, password);
+    };
+
+    this.send_login_response(res, res_code, session_token);
 }
 
-exports.change_password = function change_password(user, password, password_old) {
+exports.change_password = function change_password(res, user, password, password_old) {
     var users_db = load_users_and_passwords();
 
-    var res = is_user_password_combination_valid(user, password_old, users_db);
-    if (!result.is_successful(res)) {
-        return res;
+    var res_code = is_user_password_combination_valid(user, password_old, users_db);
+
+    if (result.is_successful(res_code)) {
+        res_code = update_and_write_users_db(user, password, users_db);
     }
 
-    res = update_and_write_users_db(user, password, users_db);
-
-    if (result.is_successful(res)) {
-        return result.code.note_login_password_changed;
-    }
-
-    return res;
+    this.send_login_response(res, res_code, null);
 }
 
-exports.register = function register(user, password, password_register) {
-    var res = does_string_contain_only_valid_chars(user);
-    if (!result.is_successful(res)) {
-        return res;
+async function register_chat(user, password) {
+    try {
+        const response = await axios.post('https://chat.antentafm.ddnss.de/api/v1/users.register', {
+            username: user,
+            pass: password,
+            name: user,
+            email: user + '@no.email.com'
+        })
+        if (response.data.success) {
+            return true;
+        } else {
+            return false;
+        }
+    } catch (error) {
+        return false
+    }
+}
+
+exports.send_login_response = function send_login_response(res, res_code, session_token) {
+    const data = {
+        status_message : result.get_status_message(res_code),
+        x_auth_token : session_token
+    };
+    res.status(result.get_html_code(res_code)).send(data);
+}
+
+exports.register = function register(res, user, password, password_register) {
+    var res_code = does_string_contain_only_valid_chars(user);
+
+    var users_db = null
+    if (result.is_successful(res_code)) {
+        users_db = load_users_and_passwords();
+        if (user in users_db) {
+            res_code = result.code.error_login_user_already_exists;
+        }
     }
 
-    var users_db = load_users_and_passwords();
-    if (user in users_db) {
-        return result.code.error_login_user_already_exists;
+    if (result.is_successful(res_code)) {
+        res_code = is_user_password_combination_valid('antentafm_register_pw', password_register, users_db);
     }
 
-    res = is_user_password_combination_valid('antentafm_register_pw', password_register, users_db);
-    if (!result.is_successful(res)) {
-        return res;
+    if (result.is_successful(res_code)) {
+        register_chat(user, password).then(function(is_valid) {
+            if (is_valid) {
+                res_code = update_and_write_users_db(user, password, users_db);
+
+                if (result.is_successful(res_code)) {
+                    res_code = result.code.note_login_registered;
+                }
+            } else {
+                res_code = result.code.error_login_database;
+            }
+
+            const data = {
+                status_message : result.get_status_message(res_code),
+                x_auth_token : null
+            };
+            res.status(result.get_html_code(res_code)).send(data);
+        }).catch(function (error) {
+            const data = {
+                status_message : result.get_status_message(result.code.error_login_database),
+                x_auth_token : null
+            };
+            res.status(result.get_html_code(res_code)).send(data);
+        });
+    } else {
+        this.send_login_response(res, res_code, null);
     }
-
-    res = update_and_write_users_db(user, password, users_db);
-
-    if (result.is_successful(res)) {
-        return result.code.note_login_registered;
-    }
-
-    return res;
 }
 
 exports.create_session_token = function create_session_token(user, password) {
