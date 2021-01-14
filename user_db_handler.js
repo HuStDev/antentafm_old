@@ -9,17 +9,17 @@ const fs = require('fs');
 //-----------------------------------------------------------------------------
 exports.login = function login(user, password) {
     const users_db = load_users_and_passwords();
-    const res = is_user_password_combination_valid(user, password, users_db);
+    const res = is_user_password_combination_valid(user.toLowerCase(), password, users_db);
 
     return res;
 }
 
 exports.change_password = function change_password(user, password, password_old) {
     var users_db = load_users_and_passwords();
-    var res = is_user_password_combination_valid(user, password_old, users_db);
+    var res = is_user_password_combination_valid(user.toLowerCase(), password_old, users_db);
 
     if (res) {
-        users_db = update_users_db(user, password, users_db);
+        users_db = update_users_db(user.toLowerCase(), password, users_db);
     } else {
         users_db = null;
     }
@@ -33,7 +33,7 @@ exports.register = function register(user, password, password_register) {
     var users_db = null
     if (res) {
         users_db = load_users_and_passwords();
-        if (user in users_db) {
+        if (user.toLowerCase() in users_db) {
             res = false;
         }
     }
@@ -46,7 +46,7 @@ exports.register = function register(user, password, password_register) {
     }
 
     if (res) {
-        users_db = update_users_db(user, password, users_db);
+        users_db = update_users_db(user.toLowerCase(), password, users_db);
     } else {
         users_db = null;
     }
