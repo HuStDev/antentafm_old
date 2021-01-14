@@ -70,3 +70,8 @@ exports.decode = function(value) {
    
     return decrypted.toString();
 }
+
+exports.encode_sha256 = function(value) {
+    const hash = crypto.createHash('sha256').update(value).digest('hex');
+    return hash;
+}

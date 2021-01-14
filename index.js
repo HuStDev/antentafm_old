@@ -158,7 +158,32 @@ function register(res, user, password, password_register) {
 }
 
 function change_password(res, user, password, password_old) {
-
+    // Validate user registration
+    const user_db = users_handle.change_password(user, password, password_old);
+    if (user_db != null) {
+        // Try chat registration
+        chat_handle.change_password(user, password, password_old).then(function(is_chat_valid) {
+            const status_message = 'Password change successful';
+            const html_response = 401;
+            if (is_chat_valid) {
+                users_handle.store_user_db(user_db);
+                results.send_login_response(res, html_response, status_message, null);
+            } else {
+                // Throw error that gets catched to test chat login
+                throw 'Password change failed';
+            }
+        }).catch(function(error){
+            const status_message = 'Password change failed';
+            const html_response = 401;
+            results.send_login_response(res, html_response, status_message, null);
+        });
+    }
+    // User registration failed
+    else {
+        const status_message = 'Password change failed';
+        const html_response = 401;
+        results.send_login_response(res, html_response, status_message, null);
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -227,7 +252,7 @@ app.post('/login_chat', function (req, res) {
     if (session_token) {
         login_chat_by_token(req, res, session_token);
     } else {
-        send_login_chat_response(res, result.code.error_html_header_information_missing, null);
+        login_chat_by_credentials(req, res);
     }
 });
 
@@ -240,6 +265,97 @@ function login_chat_by_token(req, res, session_token) {
     }
 }
 
+function login_chat_by_credentials(req, res) {
+
+    chat_handle.login(req.body['user'], req.body['pass']).then(function(chat_token) {
+        if (chat_token != null) {
+            res.set('Content-Type', 'text/html');
+            res.send(`<script>
+            window.parent.postMessage({
+                event: 'login-with-token',
+                loginToken: '${ chat_token }'
+            }, 'https://chat.antentafm.ddnss.de'); // rocket.chat's URL
+            </script>`);
+        } else {
+            results.send_login_response(res, 401, 'Invalid token', null);
+        }
+    }).catch(function(error){
+        results.send_login_response(res, 401, 'Invalid token', null);
+    });
+}
+
+// this is the endpoint configured as API URL
+app.post('/sso_chat', function (req, res) {
+
+	axios.post('https://chat.antentafm.ddnss.de/api/v1/logout'
+	).then(function() {
+		console.log('sso logout');
+	}).catch(function (error) {
+		console.log('sso error');
+	});
+
+	// add your own app logic here to validate user session (check cookies, headers, etc)
+
+	// if the user is not already logged in on your system, respond with a 401 status
+	var notLoggedIn = true;
+	if (notLoggedIn) {
+		return res.sendStatus(401);
+	}
+
+	// you can save the token on your database as well, if so just return it
+	// MongoDB - services.iframe.token
+	var savedToken = null;
+	if (savedToken) {
+		return res.json({
+			token: savedToken
+		});
+	}
+
+	// if dont have the user created on rocket.chat end yet, you can now create it
+	var currentUsername = null;
+	if (!currentUsername) {
+		axios.post('https://chat.antentafm.ddnss.de/api/v1/users.register', {
+			username: 'new-user',
+			email: 'mynewuser@email.com',
+			pass: 'new-users-passw0rd',
+			name: 'New User'
+		}).then(function (response) {
+
+			// after creation you need to log the user in to get the `authToken`
+			if (response.data.success) {
+				return axios.post('https://chat.antentafm.ddnss.de/api/v1/login', {
+					username: 'new-user',
+					password: 'new-users-passw0rd'
+				});
+			}
+		}).then(function (response) {
+			if (response.data.status === 'success') {
+				res.json({
+					loginToken: response.data.data.authToken
+				});
+			}
+		}).catch(function (error) {
+			res.sendStatus(401);
+		});
+	} else {
+
+		// otherwise create a rocket.chat session using rocket.chat's API
+		axios.post('https://chat.antentafm.ddnss.de/api/v1/login', {
+			username: 'username-set-previously',
+			password: 'password-set-previously'
+		}).then(function (response) {
+			if (response.data.status === 'success') {
+				res.json({
+					loginToken: response.data.data.authToken
+				});
+			}
+		}).catch(function() {
+			res.sendStatus(401);
+		});
+	}
+});
+
+
 //-----------------------------------------------------------------------------
 // Helpers
 function handle_unexpected_request(res) {
@@ -247,20 +363,6 @@ function handle_unexpected_request(res) {
     var html_res_code = 401;
     send_login_response(res, html_res_code, status_message, null);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 app.listen(3030, function () {
   console.log('Example app listening on port 3030!');
