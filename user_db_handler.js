@@ -92,8 +92,8 @@ function is_user_password_combination_valid(user, password, users_db) {
         return false;
     }
 
-    const password_encoded = this.encode(password);
-    if (users_db[user] == password_encoded) {
+    const password_decded = session_handle.decode(users_db[user]);
+    if (password == password_decded) {
         return true;
     } else {
         return false;

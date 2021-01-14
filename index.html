@@ -79,7 +79,7 @@
                         document.getElementById('id_chat_frame').contentWindow.postMessage(
                             {
                                 event: 'login-with-token',
-                                loginToken: response['chat_auth_token']
+                                loginToken: response['x_auth_token']
                             },
                             'https://chat.antentafm.ddnss.de'
                         );

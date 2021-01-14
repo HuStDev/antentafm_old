@@ -44,7 +44,6 @@ app.get('/', function (req, res) {
 
 //-----------------------------------------------------------------------------
 // Login
-// receives login information
 app.post('/login', function (req, res) {
     const x_auth_token = req.body['x_auth_token'];
     if (x_auth_token) {
@@ -61,20 +60,14 @@ app.get('/login', function (req, res) {
 });
 
 function login_by_token(req, res) {
-    var status_message = '';
-    var html_res_code = 200;
-
-    var auth_token = req.body['x_auth_token'];
-    var chat_token = null;
-    if (null != session_handle.verify_session_token(session_token)) {
-        //
+    const session_data = session_handle.verify_session_token(req.body['x_auth_token']);
+    if (null != session_data) {
+        res.redirect('/');
     } else {
-        auth_token = null;
-        html_res_code = 401;
-        status_message = 'Invalid session token';
+        const html_res_code = 401;
+        const status_message = 'Invalid session token';
+        results.send_login_response(res, html_res_code, status_message, null);
     }
-
-    results.send_login_response(res, html_res_code, status_message, session_token, chat_token);
 }
 
 function login_by_credentials(req, res) {
@@ -167,48 +160,19 @@ function change_password(res, user, password, password_old) {
 }
 
 //-----------------------------------------------------------------------------
-// TODO fill
-
-//-----------------------------------------------------------------------------
-// Helpers
-function handle_unexpected_request(res) {
-    var status_message = 'Unexpected request';
-    var html_res_code = 401;
-    send_login_response(res, html_res_code, status_message, null);
-}
-
-
-
-
-
-
-
-
-
-function login_stream_by_token(session_token, req, res) {
-    var res_code = result.code.success;
-    if (null == login.verify_session_token(session_token)) {
-        res_code = result.code.error_login_token_invalid;
-    }
-
-    if (result.is_successful(res_code)){
-        res.setHeader('icecast-auth-user', '1');
-        return res.sendStatus(200);
-    } else {
+// Login Stream
+app.post('/login_stream', function (req, res) {
+    if (req.body['action'] != 'listener_add') {
         return res.sendStatus(401);
     }
-}
 
-function login_stream_by_credentials(req, res) {
-    const res_code = login.login(req.body['user'], req.body['pass']);
-
-    if (result.is_successful(res_code)){
-        res.setHeader('icecast-auth-user', '1');
-        return res.sendStatus(200);
+    const session_token = get_session_token_from_login_stream(req);
+    if (session_token) {
+        login_stream_by_token(session_token, req, res);
     } else {
-        return res.sendStatus(401);
+        login_stream_by_credentials(req, res);
     }
-}
+});
 
 function get_session_token_from_login_stream(req) {
     var session_token = null;
@@ -228,61 +192,73 @@ function get_session_token_from_login_stream(req) {
     return session_token;
 }
 
-app.post('/login_stream', function (req, res) {
-    if (req.body['action'] != 'listener_add') {
+function login_stream_by_token(session_token, req, res) {
+    const session_data = session_handle.verify_session_token(session_token);
+    if (session_data != null){
+        res.setHeader('icecast-auth-user', '1');
+        return res.sendStatus(200);
+    } else {
         return res.sendStatus(401);
     }
+}
 
-    const session_token = get_session_token_from_login_stream(req);
-    if (session_token) {
-        login_stream_by_token(session_token, req, res);
+function login_stream_by_credentials(req, res) {
+    const res_code = login.login(req.body['user'], req.body['pass']);
+
+    if (result.is_successful(res_code)){
+        res.setHeader('icecast-auth-user', '1');
+        return res.sendStatus(200);
     } else {
-        login_stream_by_credentials(req, res);
+        return res.sendStatus(401);
     }
-});
-
-function send_login_chat_response(res, res_code, session_token) {
-    const data = {
-        status_message : result.get_status_message(res_code),
-        chat_auth_token : session_token
-    };
-    res.status(result.get_html_code(res_code)).send(data);
 }
 
-function login_chat_by_token(req, res) {
-    var session_token = req.body['x_auth_token'];
-
-    const session_data = login.verify_session_token(session_token);
-    if (null == session_data) {
-        send_login_chat_response(res, result.code.error_html_header_information_missing, null);
-    }
-
-    const pass = login.decode(session_data['password']);
-    axios.post('https://chat.antentafm.ddnss.de/api/v1/login', {
-        username: String(session_data['user']),
-        password: String(pass)
-    }).then(function(response) {
-        if (response.data.status === 'success') {
-            send_login_chat_response(res, result.code.success, response.data.data.authToken );
-        }
-    }).catch(function (error) {
-        send_login_chat_response(res, result.code.error_login_token_invalid, null);
-    });
-}
-
+//-----------------------------------------------------------------------------
+// Login chat
 app.get('/login_chat', function (req, res) {
     res.set('Content-Type', 'text/html');
     fs.createReadStream('login.html').pipe(res);
 });
 
 app.post('/login_chat', function (req, res) {
-    const x_auth_token = req.body['x_auth_token'];
-    if (x_auth_token) {
-        login_chat_by_token(req, res);
+    const session_token = req.body['x_auth_token'];
+    if (session_token) {
+        login_chat_by_token(req, res, session_token);
     } else {
         send_login_chat_response(res, result.code.error_html_header_information_missing, null);
     }
 });
+
+function login_chat_by_token(req, res, session_token) {
+    const session_data = session_handle.verify_session_token(session_token);
+    if (null != session_data) {
+        results.send_login_response(res, 200, '', session_data['chat_token']);
+    } else {
+        results.send_login_response(res, 401, 'Invalid token', session_data['chat_token']);
+    }
+}
+
+//-----------------------------------------------------------------------------
+// Helpers
+function handle_unexpected_request(res) {
+    var status_message = 'Unexpected request';
+    var html_res_code = 401;
+    send_login_response(res, html_res_code, status_message, null);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 app.listen(3030, function () {
   console.log('Example app listening on port 3030!');
