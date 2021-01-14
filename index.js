@@ -47,7 +47,7 @@ app.get('/', function (req, res) {
 app.post('/login', function (req, res) {
     const x_auth_token = req.body['x_auth_token'];
     if (x_auth_token) {
-        login_by_token(req, res);
+        login_by_token(res, x_auth_token);
     } else {
         login_by_credentials(req, res);
     }
@@ -59,10 +59,12 @@ app.get('/login', function (req, res) {
     fs.createReadStream('login.html').pipe(res);
 });
 
-function login_by_token(req, res) {
-    const session_data = session_handle.verify_session_token(req.body['x_auth_token']);
+function login_by_token(res, x_auth_token) {
+    const session_data = session_handle.verify_session_token(x_auth_token);
     if (null != session_data) {
-        res.redirect('/');
+        const html_res_code = 200;
+        const status_message = '';
+        results.send_login_response(res, html_res_code, status_message, x_auth_token);
     } else {
         const html_res_code = 401;
         const status_message = 'Invalid session token';
@@ -203,9 +205,9 @@ function login_stream_by_token(session_token, req, res) {
 }
 
 function login_stream_by_credentials(req, res) {
-    const res_code = login.login(req.body['user'], req.body['pass']);
+    const is_valid = users_handle.login(req.body['user'], req.body['pass']);
 
-    if (result.is_successful(res_code)){
+    if (is_valid){
         res.setHeader('icecast-auth-user', '1');
         return res.sendStatus(200);
     } else {
