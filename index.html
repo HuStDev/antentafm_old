@@ -30,6 +30,42 @@
   
 <div class="container-fluid rounded-lg" style="background-color:#dfdef6;">
     <h1>AntentaFM</h1>
+    <a href="#id_modal_version" data-toggle="modal" data-target="#id_modal_version">v3.0.0</a>
+
+    <!-- Modal -->
+    <div class="modal fade" id="id_modal_version" role="dialog">
+        <div class="modal-dialog">
+        
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Versionshistorie</h4>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <li class="list-group-item">
+                            <h6>3.0.0</h6>
+                            Features<br>
+                            - ein zentraler und automatischer Login fuer alle drei Systeme (keine Mehrfachanmeldungen mehr auf Website, Radiostream und Rocket.Chat)<br>
+                            - Radio Stream ist geschuetzt und nur mit gueltiger User/Password-Kombination erreichbar<br>
+                            - zentrale Nutzerverwaltungssystem (ein Nutzer und Password) fuer Website, Radiostream und Rocket.Chat<br>
+                            - Backend wurde  komplett neu mit NodeJS umgesetzt (fuer Nutzerverwaltung, APIs, etc)<br>
+                            Bugs<br>
+                            - KB: Passwortwechsel funktioniert aktuell nicht<br>
+                            - KB: Replays aktuell nicht abrufbar<br>
+                            - KB: Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
+                        </li>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+            </div>
+        </div>
+        
+        </div>
+    </div>
 </div>
   
   
@@ -64,8 +100,7 @@
 
     <div class="row mb-3" style="background-color:#dfdef6;" id="id_live_stats">
         <div class="col-sm-10 themed-grid-col embed-responsive embed-responsive-21by9" style="background-color:#dfdef6;">
-            <!--<iframe id="id_chat_frame" src="https://chat.antentafm.ddnss.de/channel/antentafm?layout=embedded"></iframe>-->
-            <iframe id="id_chat_frame" src="https://chat.antentafm.ddnss.de/channel/antentafm"></iframe>
+            <iframe id="id_chat_frame" src="https://chat.antentafm.ddnss.de/channel/antentafm?layout=embedded"></iframe>
             <script>
                 $('#id_chat_frame').ready(function () {
                     setTimeout(function(){
