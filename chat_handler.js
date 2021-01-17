@@ -69,7 +69,7 @@ exports.change_password = async function (user, password, password_old, id, toke
             throw 'Password change unexpected error'
         }
     } catch (error) {
-        return false;
+        throw error.response.data.message;
     }
 }
 
@@ -84,9 +84,9 @@ exports.register = async function(user, password) {
         if (response.data.success) {
             return true;
         } else {
-            return false;
+            throw 'Registration unexpected error'
         }
     } catch (error) {
-        return false
+        throw error.response.data.error;
     }
 }

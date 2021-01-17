@@ -90,47 +90,18 @@ function login(res, user, password) {
 }
 
 function register(res, user, password, password_register) {
-    // Validate user registration
-    const user_db = users_handle.register(user, password, password_register);
-    if (user_db != null) {
-        // Try chat registration
-        chat_handle.register(user, password).then(function(is_chat_valid) {
-            const status_message = 'Registration successful';
-            const html_response = 401;
-            if (is_chat_valid) {
-                users_handle.store_user_db(user_db);
-                results.send_login_response(res, html_response, status_message, null);
-            } else {
-                // Throw error that gets catched to test chat login
-                throw 'index register 1';
-            }
-        }).catch(function(error){
-            // In case of any error, try chat login with user credentials.
-            // This case can occure, if user is already registered in chat but not in html database
-            chat_handle.login(user, password).then(function(chat_token) {
-                var status_message = 'Registration successful';
-                const html_response = 401;
-    
-                if (chat_token != null) {
-                    users_handle.store_user_db(user_db);
-                } else {
-                    status_message = 'Registration failed';
-                }
-    
-                results.send_login_response(res, html_response, status_message, null);
-            }).catch(function(error){
-                const status_message = 'Registration failed';
-                const html_response = 401;
-                results.send_login_response(res, html_response, status_message, null);
-            });
-        });
+
+    if (!session_handle.check_registration_password(password_register)) {
+        results.send_login_response(res, 401, 'Registration password is incorrect', null);
+        return;
     }
-    // User registration failed
-    else {
-        const status_message = 'Registration failed';
-        const html_response = 401;
-        results.send_login_response(res, html_response, status_message, null);
-    }
+    
+    // Try chat registration
+    chat_handle.register(user, password).then(function(is_chat_valid) {
+        results.send_login_response(res, 401, 'Successful', null);
+    }).catch(function(error_message){
+        results.send_login_response(res, 401, String(error_message), null);
+    });
 }
 
 function change_password(res, user, password, password_old) {

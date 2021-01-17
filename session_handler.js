@@ -76,3 +76,9 @@ exports.encode_sha256 = function(value) {
     const hash = crypto.createHash('sha256').update(value).digest('hex');
     return hash;
 }
+
+exports.check_registration_password = function(password_register) {
+    const decoded = this.decode(configuration.registration_password);
+    const res = decoded == password_register;
+    return res;
+}
