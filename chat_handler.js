@@ -23,22 +23,30 @@ exports.login = async function (user, password) {
     }
 }
 
-exports.logout = async function() {
+exports.logout = async function(id, token) {
     try {
-        const response = await axios.post(configuration.chat_url + '/api/v1/logout')
+        const post_data = {
+        };
+        const post_headers = {
+            headers:{
+                'X-Auth-Token': token,
+                'X-User-Id': id
+            }
+        };
+
+        const response = await axios.post(configuration.chat_url + '/api/v1/logout', post_data, post_headers)
         if (response.data.status == 'success') {
             return true;
         } else {
-            return false;
+            throw 'Logout unexpected error'
         }
     } catch (error) {
-        return false
+        throw error.response.data.message;
     }
 }
 
 exports.change_password = async function (user, password, password_old, id, token) {
     try {
-
         const post_data = {
             data: {
                 currentPassword : session_handler.encode_sha256(password_old),
@@ -58,7 +66,7 @@ exports.change_password = async function (user, password, password_old, id, toke
         if (response.data.success) {
             return true;
         } else {
-            return false;
+            throw 'Password change unexpected error'
         }
     } catch (error) {
         return false;

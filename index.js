@@ -134,33 +134,17 @@ function register(res, user, password, password_register) {
 }
 
 function change_password(res, user, password, password_old) {
-    // Validate user registration
-    const user_db = users_handle.change_password(user, password, password_old);
-    if (user_db != null) {
-        chat_handle.login(user, password_old).then(function([id, token]){
-            if (!token || !id) {
-                throw 'index change_password 1';
-            }
-
-            chat_handle.change_password(user, password, password_old, id, token).then(function(has_changed){
-                if (!has_changed) {
-                    throw 'index change_password 2';
-                }
-
-                chat_handle.logout().then(function(has_logged_out) {
-                    results.send_login_response(res, 401, 'Password change successful', null);
-                }).catch(function(error){
-                    results.send_login_response(res, 401, 'Password change successful', null);
-                })
+    chat_handle.login(user, password_old).then(function([id, token]){
+        chat_handle.change_password(user, password, password_old, id, token).then(function(has_changed){
+            chat_handle.logout(id, token).then(function(has_logged_out) {
+                results.send_login_response(res, 401, 'Successful', null);
             }).catch(function(error){
-                throw 'index change_password 3'; 
+                results.send_login_response(res, 401, 'Successful', null);
             })
-        }).catch(function(error){
-            results.send_login_response(res, 401, 'Password change failed', null);
         })
-    } else {
-        results.send_login_response(res, 401, 'Password change failed', null);
-    }
+    }).catch(function(error_message){
+        results.send_login_response(res, 401, String(error_message), null);
+    })
 }
 
 //-----------------------------------------------------------------------------
