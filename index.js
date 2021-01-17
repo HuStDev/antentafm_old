@@ -126,7 +126,7 @@ function register(res, user, password, password_register) {
                 results.send_login_response(res, html_response, status_message, null);
             } else {
                 // Throw error that gets catched to test chat login
-                throw 'chat register failed';
+                throw 'index register 1';
             }
         }).catch(function(error){
             // In case of any error, try chat login with user credentials.
@@ -161,28 +161,29 @@ function change_password(res, user, password, password_old) {
     // Validate user registration
     const user_db = users_handle.change_password(user, password, password_old);
     if (user_db != null) {
-        // Try chat registration
-        chat_handle.change_password(user, password, password_old).then(function(is_chat_valid) {
-            const status_message = 'Password change successful';
-            const html_response = 401;
-            if (is_chat_valid) {
-                users_handle.store_user_db(user_db);
-                results.send_login_response(res, html_response, status_message, null);
-            } else {
-                // Throw error that gets catched to test chat login
-                throw 'Password change failed';
+        chat_handle.login(user, password_old).then(function([id, token]){
+            if (!token || !id) {
+                throw 'index change_password 1';
             }
+
+            chat_handle.change_password(user, password, password_old, id, token).then(function(has_changed){
+                if (!has_changed) {
+                    throw 'index change_password 2';
+                }
+
+                chat_handle.logout().then(function(has_logged_out) {
+                    results.send_login_response(res, 401, 'Password change successful', null);
+                }).catch(function(error){
+                    results.send_login_response(res, 401, 'Password change successful', null);
+                })
+            }).catch(function(error){
+                throw 'index change_password 3'; 
+            })
         }).catch(function(error){
-            const status_message = 'Password change failed';
-            const html_response = 401;
-            results.send_login_response(res, html_response, status_message, null);
-        });
-    }
-    // User registration failed
-    else {
-        const status_message = 'Password change failed';
-        const html_response = 401;
-        results.send_login_response(res, html_response, status_message, null);
+            results.send_login_response(res, 401, 'Password change failed', null);
+        })
+    } else {
+        results.send_login_response(res, 401, 'Password change failed', null);
     }
 }
 
