@@ -8,11 +8,12 @@ const jwt = require("jsonwebtoken");
 // exported functions
 //-----------------------------------------------------------------------------
 
-exports.create_session_token = function(user, password, chat_token) {
+exports.create_session_token = function(user, password, id, token) {
     const payload = {
         user: user,
         password: this.encode(password),
-        chat_token: chat_token
+        id: id,
+        token: token
     };
 
     const options = {

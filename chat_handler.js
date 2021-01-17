@@ -2,6 +2,7 @@ const path = require('path');
 const configuration = require('.' + path.sep + 'configuration');
 const session_handler = require('.' + path.sep + 'session_handler');
 const axios = require('axios');
+const { response } = require('express');
 
 //-----------------------------------------------------------------------------
 // exported functions
@@ -15,10 +16,10 @@ exports.login = async function (user, password) {
         if (response.data.status == 'success') {
             return [response.data.data.me['_id'], response.data.data.authToken];
         } else {
-            return [null, null];
+            throw 'Login unexpected error'
         }
     } catch (error) {
-        return [null, null]
+        throw error.response.data.message;
     }
 }
 

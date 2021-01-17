@@ -87,10 +87,10 @@ exports.get_status_message = function(result) {
     return message;
 }
 
-exports.send_login_response = function (res, html_res_code, status_message, auth_token) {
+exports.send_login_response = function (res, html_res_code, status_message, token) {
     const data = {
         status_message : status_message,
-        x_auth_token : auth_token
+        x_auth_token : token
     };
     res.status(html_res_code).send(data);
 }

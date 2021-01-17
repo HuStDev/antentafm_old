@@ -1,7 +1,6 @@
 const path = require('path');
 const chat_handle = require('.' + path.sep + 'chat_handler');
 const session_handle = require('.' + path.sep + 'session_handler');
-const users_handle = require('.' + path.sep + 'user_db_handler');
 const results = require('.' + path.sep + 'result');
 
 const express = require('express');
@@ -34,20 +33,20 @@ app.use('/scripts', express.static('.' + path.sep + 'scripts'), serve('.' + path
 //-----------------------------------------------------------------------------
 // Root
 app.get('/', function (req, res) {  
-    if (null == session_handle.verify_session_token(req.query['x_auth_token'])) {
+    if (session_handle.verify_session_token(req.query['x_auth_token'])) {
+        res.set('Content-Type', 'text/html');
+        fs.createReadStream('index.html').pipe(res);
+    } else {
         return res.redirect('/login');
     }
-
-    res.set('Content-Type', 'text/html');
-    fs.createReadStream('index.html').pipe(res);
 });
 
 //-----------------------------------------------------------------------------
 // Login
 app.post('/login', function (req, res) {
-    const x_auth_token = req.body['x_auth_token'];
-    if (x_auth_token) {
-        login_by_token(res, x_auth_token);
+    const token = req.body['x_auth_token'];
+    if (token) {
+        login_by_token(res, token);
     } else {
         login_by_credentials(req, res);
     }
@@ -59,16 +58,12 @@ app.get('/login', function (req, res) {
     fs.createReadStream('login.html').pipe(res);
 });
 
-function login_by_token(res, x_auth_token) {
-    const session_data = session_handle.verify_session_token(x_auth_token);
+function login_by_token(res, token) {
+    const session_data = session_handle.verify_session_token(token);
     if (null != session_data) {
-        const html_res_code = 200;
-        const status_message = '';
-        results.send_login_response(res, html_res_code, status_message, x_auth_token);
+        results.send_login_response(res, 200, '', token);
     } else {
-        const html_res_code = 401;
-        const status_message = 'Invalid session token';
-        results.send_login_response(res, html_res_code, status_message, null);
+        results.send_login_response(res, 401, 'Invalid session token', null);
     }
 }
 
@@ -86,31 +81,12 @@ function login_by_credentials(req, res) {
 }
 
 function login(res, user, password) {
-    const is_user_valid = users_handle.login(user, password);
-    if (is_user_valid) {
-        chat_handle.login(user, password).then(function(chat_token) {
-            var status_message = '';
-            var html_response = 200;
-            var session_token = null;
-
-            if (chat_token != null) {
-                session_token = session_handle.create_session_token(user, password, chat_token);
-            } else {
-                html_response = 401;
-                status_message = 'Login failed';
-            }
-
-            results.send_login_response(res, html_response, status_message, session_token);
-        }).catch(function(error){
-            var status_message = 'Login failed';
-            var html_response = 401;
-            results.send_login_response(res, html_response, status_message, null);
-        });
-    } else {
-        var status_message = 'Login failed';
-        var html_response = 401;
-        results.send_login_response(res, html_response, status_message, null); 
-    }
+    chat_handle.login(user, password).then(function([id, token]) {
+        const session_token = session_handle.create_session_token(user, password, id, token);
+        results.send_login_response(res, 200, 'Successful', session_token);
+    }).catch(function(error_message){
+        results.send_login_response(res, 401, String(error_message), null);
+    });
 }
 
 function register(res, user, password, password_register) {
@@ -259,10 +235,10 @@ app.post('/login_chat', function (req, res) {
 
 function login_chat_by_token(req, res, session_token) {
     const session_data = session_handle.verify_session_token(session_token);
-    if (null != session_data) {
-        results.send_login_response(res, 200, '', session_data['chat_token']);
+    if (session_data) {
+        results.send_login_response(res, 200, '', session_data['token']);
     } else {
-        results.send_login_response(res, 401, 'Invalid token', session_data['chat_token']);
+        results.send_login_response(res, 401, 'Invalid token', session_data['token']);
     }
 }
 
