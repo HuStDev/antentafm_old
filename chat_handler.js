@@ -2,7 +2,6 @@ const path = require('path');
 const configuration = require('.' + path.sep + 'configuration');
 const session_handler = require('.' + path.sep + 'session_handler');
 const axios = require('axios');
-const { response } = require('express');
 
 //-----------------------------------------------------------------------------
 // exported functions
