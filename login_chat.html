@@ -247,11 +247,11 @@
 
             $.ajax(
             {
-                url : window.location.origin + '/login',
+                url : window.location.origin + '/login_chat',
                 type : "POST",
                 data : post_data,
                 success: function(response) {
-                    //
+                    //console.log('chat login successful');
                 },
                 error : function(response_header) {
                     // In case of error, remove auth token from session storage, post error and reload form
@@ -267,11 +267,11 @@
         set_default_form_values();
         update_login_form();
 
-        $("#form_post_id").submit(function(e)
-        {
-            post_login_data();
-            e.preventDefault(); //STOP default action
-        });
+        //$("#form_post_id").submit(function(e)
+        //{
+        //    post_login_data();
+        //    e.preventDefault(); //STOP default action
+        //});
     </script>
 </div>
 

@@ -209,7 +209,13 @@ app.post('/login_chat', function (req, res) {
 function login_chat_by_token(req, res, session_token) {
     const session_data = session_handle.verify_session_token(session_token);
     if (session_data) {
-        results.send_login_response(res, 200, '', session_data['token']);
+        res.set('Content-Type', 'text/html');
+        res.send(`<script>
+        window.parent.postMessage({
+            event: 'login-with-token',
+            loginToken: '${ session_data['token'] }'
+        }, 'https://chat.antentafm.ddnss.de'); // rocket.chat's URL
+        </script>`);
     } else {
         results.send_login_response(res, 401, 'Invalid token', session_data['token']);
     }
@@ -217,7 +223,7 @@ function login_chat_by_token(req, res, session_token) {
 
 function login_chat_by_credentials(req, res) {
 
-    chat_handle.login(req.body['user'], req.body['pass']).then(function(chat_token) {
+    chat_handle.login(req.body['username'], req.body['password']).then(function(chat_token) {
         if (chat_token != null) {
             res.set('Content-Type', 'text/html');
             res.send(`<script>
