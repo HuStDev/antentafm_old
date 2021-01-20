@@ -71,11 +71,13 @@ function create_new_audio_stream(class_name, id, id_root, source, type, style, p
 }
 
 function create_recording_day(year, month, day, id_card_body) {
+
+	const query = '?x_auth_token=' + sessionStorage.getItem('x_auth_token');
 	
-	const date = year + '-' + month + '-' + day;
-	const link_month = '/recordings/' + year + '/' + month + '/';
+	const date = year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+	const link_month = '/recordings/' + year + '/' + String(month).padStart(2, '0') + '/';
 	const link_day = link_month + date;
-	$.when(get_content(link_month)).done(function(data_month){
+	$.when(get_content(link_month + query)).done(function(data_month){
 
 		const id_day = "day_" + date;
 		
@@ -84,19 +86,19 @@ function create_recording_day(year, month, day, id_card_body) {
 			const id_record = "record_" + date;
 			create_new_div("col-sm-2 themed-grid-col", id_record, id_day, "background-color:#dfdef6;");
 			const id_audio = "audio_" + date;
-			create_new_audio_record(id_audio, id_record, link_day + '.mp3', 'mp3');
+			create_new_audio_record(id_audio, id_record, link_day + '.mp3' + query, 'mp3');
 		});
 		$(data_month).find('a[href$="' + date + '.ogg"]').each(function() {
 			create_new_div("row mb-3", id_day, id_card_body, "background-color:#dfdef6;", date);
 			const id_record = "record_" + date;
 			create_new_div("col-sm-2 themed-grid-col", id_record, id_day, "background-color:#dfdef6;");
 			const id_audio = "audio_" + date;
-			create_new_audio_record(id_audio, id_record, link_day + '.ogg', 'ogg');
+			create_new_audio_record(id_audio, id_record, link_day + '.ogg' + query, 'ogg');
 		});
 				
 		const file_song = date + "_songs.html";
 		$(data_month).find('a[href$="' + file_song + '"]').each(function() {
-			$.when(get_content(link_month + file_song)).done(function(text){
+			$.when(get_content(link_month + file_song + query)).done(function(text){
 				create_new_div("row mb-3", id_day, id_card_body, "background-color:#dfdef6;", date);
 				const id_songs = "songs_" + date;
 				create_new_div("col-sm-3 themed-grid-col", id_songs, id_day, "background-color:#dfdef6;");
@@ -107,7 +109,7 @@ function create_recording_day(year, month, day, id_card_body) {
 		
 		const file_news = date + "_news.html";
 		$(data_month).find('a[href$="' + file_news + '"]').each(function() {
-			$.when(get_content(link_month + file_news)).done(function(text){
+			$.when(get_content(link_month + file_news + query)).done(function(text){
 				create_new_div("row mb-3", id_day, id_card_body, "background-color:#dfdef6;", date);
 				const id_news = "news_" + date;
 				create_new_div("col-sm-4 themed-grid-col", id_news, id_day, "background-color:#dfdef6;");

@@ -2,6 +2,7 @@ const path = require('path');
 const chat_handle = require('.' + path.sep + 'chat_handler');
 const session_handle = require('.' + path.sep + 'session_handler');
 const results = require('.' + path.sep + 'result');
+const configuration = require('.' + path.sep + 'configuration');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -17,16 +18,33 @@ app.use(bodyParser.json());
 //-----------------------------------------------------------------------------
 // CORS setting
 app.use((req, res, next) => {
-    res.set('Access-Control-Allow-Origin', 'http://localhost:3000'); // this is the rocket.chat URL
+    res.set('Access-Control-Allow-Origin', 'https://localhost:3000'); // this is the rocket.chat URL
     res.set('Access-Control-Allow-Credentials', 'true');
 
-    next();
+    next(); 
 });
 
 //-----------------------------------------------------------------------------
 // Static files
-app.use(express.static('C:\\Users\\hstra\\Documents\\develop'));
-app.use('/files', express.static('C:\\Users\\hstra\\Documents\\develop\\antentafm'), serve('C:\\Users\\hstra\\Documents\\develop\\antentafm', { 'icons': true }))
+app.use(express.static(configuration.path_to_recordings));
+
+app.use('/recordings', (req, res, next) => {    
+    if (session_handle.verify_session_token(req.query['x_auth_token'])) {
+        req.headers['x_auth_token'] = req.query['x_auth_token'];
+        req.x_auth_token = req.query['x_auth_token'];
+        res.setHeader('x_auth_token', req.query['x_auth_token']);
+        next();
+    } else {
+        return;
+    }
+});
+
+//function test(res, path, stat) {
+//    console.log(res);
+//    console.log(path);
+//    console.log(stat);
+//}
+app.use('/recordings', express.static(configuration.path_to_recordings), serve(configuration.path_to_recordings, { 'icons': true}))
 
 app.use('/scripts', express.static('.' + path.sep + 'scripts'), serve('.' + path.sep + 'scripts', { 'icons': true }))
 
@@ -176,7 +194,7 @@ function login_stream_by_credentials(req, res) {
 // Login chat
 app.get('/login_chat', function (req, res) {
     res.set('Content-Type', 'text/html');
-    fs.createReadStream('login.html').pipe(res);
+    fs.createReadStream('login_chat.html').pipe(res);
 });
 
 app.post('/login_chat', function (req, res) {
@@ -221,9 +239,9 @@ app.post('/sso_chat', function (req, res) {
 
 	axios.post('https://chat.antentafm.ddnss.de/api/v1/logout'
 	).then(function() {
-		console.log('sso logout');
+		//console.log('sso logout');
 	}).catch(function (error) {
-		console.log('sso error');
+		//console.log('sso error');
 	});
 
 	// add your own app logic here to validate user session (check cookies, headers, etc)

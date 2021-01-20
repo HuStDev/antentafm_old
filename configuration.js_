@@ -3,3 +3,4 @@ const path = require('path');
 exports.jwt_secret_key = '';
 exports.registration_password = '';
 exports.chat_url = '';
+exports.path_to_recordings = '';
