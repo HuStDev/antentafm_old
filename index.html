@@ -27,105 +27,124 @@
 <body style="background-color:#f6f6f6;">
 
 
-  
-<div class="container-fluid rounded-lg" style="background-color:#dfdef6;">
-    <h1>AntentaFM</h1>
-    <a href="#id_modal_version" data-toggle="modal" data-target="#id_modal_version">v3.1.2</a>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand">AntentaFM</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="#id_modal_version" data-toggle="modal" data-target="#id_modal_version">v3.2.0</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Direktlinks
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="https://chat.antentafm.ddnss.de">Chat</a>
+                <a class="dropdown-item" href="https://stream.antentafm.ddnss.de/cast" id="id_link_stream">Radio Stream</a>
+                <a class="dropdown-item" href="https://radio.antentafm.ddnss.de/recordings" id="id_link_recordings">Aufnahmen</a>
+                </div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="id_stream_status"></a>
+            </li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0">
+        <button class="btn btn btn-secondary my-2 my-sm-0" type="submit" onclick="logout()">Abmelden</button>
+        </form>
+
+        <script>    
+            document.getElementById('id_link_recordings').href = window.location.origin + '/recordings?x_auth_token=' + sessionStorage.getItem('x_auth_token');
+            document.getElementById('id_link_stream').href = 'https://stream.antentafm.ddnss.de/cast?x_auth_token=' + sessionStorage.getItem('x_auth_token');
+        
+            function logout() {
+                sessionStorage.removeItem('x_auth_token');
+                window.location.href = '/';
+            }
+        </script>
+    </div>
 
     <!-- Modal -->
     <div class="modal fade" id="id_modal_version" role="dialog">
         <div class="modal-dialog modal-dialog-scrollable">
-        
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Versionshistorie</h4>
-            </div>
-            <div class="modal-body">
-                <ul class="list-group">
-                    <li class="list-group-item">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Versionshistorie</h4>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group">
                         <li class="list-group-item">
-                            <h6>3.1.2 - 2021-01-20</h6>
-                            Verbesserungen<br>
-                            - Beschreibungen auf Login-Seite angepasst<br>
-                            Fixed Bugs<br>
-                            - Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
-                            Known Bugs<br>
-                            - Direktlink zu Replays funktioniert nicht<br>
+                            <li class="list-group-item">
+                                <h6>3.2.0 - 2021-01-21</h6>
+                                New Features<br>
+                                - Navbar am oberen Bildschrimrand mit folgenden Informationen<br>
+                                + Direktlinks u.a. zu Chat, Stream<br>
+                                + Anzeige aktueller Radio-Streaminformationen<br>
+                                + Logout Button zum Abmelden der Session
+                                Verbesserungen<br>
+                                - Zeit der Gueltigkeit der aktuellen Session wurde auf eine Woche erhoeht<br>
+                                Known Bugs<br>
+                                - Direktlink zu Replays funktioniert nicht<br>
+                            </li>
+                            <li class="list-group-item">
+                                <h6>3.1.2 - 2021-01-20</h6>
+                                Verbesserungen<br>
+                                - Beschreibungen auf Login-Seite angepasst<br>
+                                Fixed Bugs<br>
+                                - Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
+                                Known Bugs<br>
+                                - Direktlink zu Replays funktioniert nicht<br>
+                            </li>
+                            <li class="list-group-item">
+                                <h6>3.1.1 - 2021-01-18</h6>
+                                Fixed Bugs<br>
+                                - Replays aktuell nicht abrufbar<br>
+                                Known Bugs<br>
+                                - Direktlink zu Replays funktioniert nicht<br>
+                                - Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
+                            </li>
+                            <li class="list-group-item">
+                                <h6>3.1.0 - 2021-01-17</h6>
+                                New Features<br>
+                                - Umsetllung Nutzerdatenbank - wird zentral von Rocket.Chat Instanz verwalten<br>
+                                - Version Historie auch im Login-Screen verfuegbar<br>
+                                Fixed Bugs<br>
+                                - Passwortwechsel funktioniert aktuell nicht<br>
+                                Known Bugs<br>
+                                - Replays aktuell nicht abrufbar<br>
+                                - Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
+                            </li>
+                            <li class="list-group-item">
+                                <h6>3.0.0 - 2021-01-15</h6>
+                                New Features<br>
+                                - ein zentraler und automatischer Login fuer alle drei Systeme (keine Mehrfachanmeldungen mehr auf Website, Radiostream und Rocket.Chat)<br>
+                                - Radio Stream ist geschuetzt und nur mit gueltiger User/Password-Kombination erreichbar<br>
+                                - zentrales Nutzerverwaltungssystem (ein Nutzer und Password) fuer Website, Radiostream und Rocket.Chat<br>
+                                - Backend wurde  komplett neu mit NodeJS umgesetzt (fuer Nutzerverwaltung, APIs, etc)<br>
+                                Known Bugs<br>
+                                - Passwortwechsel funktioniert aktuell nicht<br>
+                                - Replays aktuell nicht abrufbar<br>
+                                - Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
+                            </li>
                         </li>
-                        <li class="list-group-item">
-                            <h6>3.1.1 - 2021-01-18</h6>
-                            Fixed Bugs<br>
-                            - Replays aktuell nicht abrufbar<br>
-                            Known Bugs<br>
-                            - Direktlink zu Replays funktioniert nicht<br>
-                            - Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
-                        </li>
-                        <li class="list-group-item">
-                            <h6>3.1.0 - 2021-01-17</h6>
-                            New Features<br>
-                            - Umsetllung Nutzerdatenbank - wird zentral von Rocket.Chat Instanz verwalten<br>
-                            - Version Historie auch im Login-Screen verfuegbar
-                            Fixed Bugs<br>
-                            - Passwortwechsel funktioniert aktuell nicht<br>
-                            Known Bugs<br>
-                            - Replays aktuell nicht abrufbar<br>
-                            - Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
-                        </li>
-                        <li class="list-group-item">
-                            <h6>3.0.0 - 2021-01-15</h6>
-                            New Features<br>
-                            - ein zentraler und automatischer Login fuer alle drei Systeme (keine Mehrfachanmeldungen mehr auf Website, Radiostream und Rocket.Chat)<br>
-                            - Radio Stream ist geschuetzt und nur mit gueltiger User/Password-Kombination erreichbar<br>
-                            - zentrales Nutzerverwaltungssystem (ein Nutzer und Password) fuer Website, Radiostream und Rocket.Chat<br>
-                            - Backend wurde  komplett neu mit NodeJS umgesetzt (fuer Nutzerverwaltung, APIs, etc)<br>
-                            Known Bugs<br>
-                            - Passwortwechsel funktioniert aktuell nicht<br>
-                            - Replays aktuell nicht abrufbar<br>
-                            - Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
-                        </li>
-                    </li>
-                </ul>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
+                </div>
             </div>
         </div>
-        
-        </div>
     </div>
-</div>
+</nav>
   
-  
- 
-<div style="background-color:#dfdef6;" id="id_live">
-    <h3>Live</h3>
-  
-    <!-- required workaround for chrome, otherwise autoplay of dynamic create audio elements won't work -->
-    <iframe src="scripts/dummy.mp3" allow="autoplay" style="display:none" id="id_live_audioframe">
-    </iframe>
-
-    <script src="scripts/icecast_stats.js" type="text/javascript"></script>
-    <script>
-        setInterval(update_icecast_stats, 10000); 
-        update_icecast_stats();
-    </script>
- 
-    <div class="row mb-3" style="background-color:#dfdef6;" id="id_live_stats">
-        <div class="col-sm-1 themed-grid-col" style="background-color:#dfdef6;" id="id_live_stats_online"></div>
-        <div class="col-sm-1 themed-grid-col" style="background-color:#dfdef6;" id="id_live_stats_listeners"></div>
-        <div class="col-sm-3 themed-grid-col" style="background-color:#dfdef6;" id="id_live_stats_song"></div>
-    </div>
-
-</div>
 
 <div class="container-fluid rounded-lg" style="background-color:#dfdef6;" id="id_chat">
     <h3>Chat</h3>
-    
-    <p>
-        <a href="https://chat.antentafm.ddnss.de" target="_blank">Direktlink</a> zum Rocket.Chat Server
-    </p>
-
     <div class="row mb-3" style="background-color:#dfdef6;" id="id_live_stats">
         <div class="col-sm-10 themed-grid-col embed-responsive embed-responsive-21by9" style="background-color:#dfdef6;">
             <iframe id="id_chat_frame" src="https://chat.antentafm.ddnss.de/channel/antentafm?layout=embedded"></iframe>
@@ -163,14 +182,28 @@
             <p>
                 <a class="weatherwidget-io" href="https://forecast7.com/de/48d7711d43/ingolstadt/" data-label_1="INGOLSTADT" data-label_2="" data-icons="Climacons Animated" data-days="3" data-theme="pure" data-basecolor="#dfdef6" >INGOLSTADT WETTER</a>
             </p>
-            <p>
+            <!--<p>
                 <a class="weatherwidget-io" href="https://forecast7.com/de/53d559d99/hamburg/" data-label_1="HAMBURG" data-label_2="" data-icons="Climacons Animated" data-days="3" data-theme="pure" data-basecolor="#dfdef6" >HAMBURG WETTER</a>
-            </p>
+            </p>-->
             <script>
                 !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
             </script>
         </div>
     </div>
+</div>
+
+<div style="background-color:#dfdef6;" id="id_live">
+    <h3>Live</h3>
+  
+    <!-- required workaround for chrome, otherwise autoplay of dynamic create audio elements won't work -->
+    <iframe src="scripts/dummy.mp3" allow="autoplay" style="display:none" id="id_live_audioframe">
+    </iframe>
+
+    <script src="scripts/icecast_stats.js" type="text/javascript"></script>
+    <script>
+        setInterval(update_icecast_stats, 10000); 
+        update_icecast_stats();
+    </script>
 </div>
 
   
@@ -180,14 +213,6 @@
     <script src="scripts/create_recordings_section.js"></script>
     <script>    
         create_recordings();
-    </script>
-    
-    <p>
-        <a href='https://radio.antentafm.ddnss.de/recordings' target="_blank" id="id_link_recordings">Link</a> zu allen Aufnahmen.
-    </p>
-
-    <script>    
-        document.getElementById('id_link_recordings').href = window.location.origin + '/recordings?x_auth_token=' + sessionStorage.getItem('x_auth_token');
     </script>
 </div>
 

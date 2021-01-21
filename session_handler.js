@@ -17,7 +17,7 @@ exports.create_session_token = function(user, password, id, token) {
     };
 
     const options = {
-        expiresIn: 60*60*24 //24h
+        expiresIn: 60*60*24*7 //24h * 7days
         //algorithm: 'RS384'
     };
 
