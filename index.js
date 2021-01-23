@@ -1,5 +1,5 @@
 const path = require('path');
-const chat_handle = require('.' + path.sep + 'chat_handler');
+const rocket_chat = require('.' + path.sep + 'rocket_chat_connector');
 const session_handle = require('.' + path.sep + 'session_handler');
 const results = require('.' + path.sep + 'result');
 const configuration = require('.' + path.sep + 'configuration');
@@ -99,7 +99,7 @@ function login_by_credentials(req, res) {
 }
 
 function login(res, user, password) {
-    chat_handle.login(user, password).then(function([id, token]) {
+    rocket_chat.login(user, password, configuration.chat_url).then(function([id, token]) {
         const session_token = session_handle.create_session_token(user, password, id, token);
         results.send_login_response(res, 200, 'Successful', session_token);
     }).catch(function(error_message){
@@ -115,7 +115,7 @@ function register(res, user, password, password_register) {
     }
     
     // Try chat registration
-    chat_handle.register(user, password).then(function(is_chat_valid) {
+    rocket_chat.register(user, password, configuration.chat_url).then(function(is_chat_valid) {
         results.send_login_response(res, 401, 'Successful', null);
     }).catch(function(error_message){
         results.send_login_response(res, 401, String(error_message), null);
@@ -123,9 +123,9 @@ function register(res, user, password, password_register) {
 }
 
 function change_password(res, user, password, password_old) {
-    chat_handle.login(user, password_old).then(function([id, token]){
-        chat_handle.change_password(user, password, password_old, id, token).then(function(has_changed){
-            chat_handle.logout(id, token).then(function(has_logged_out) {
+    rocket_chat.login(user, password_old, configuration.chat_url).then(function([id, token]){
+        rocket_chat.update(password, password_old, id, token, configuration.chat_url).then(function(has_changed){
+            rocket_chat.logout(id, token, configuration.chat_url).then(function(has_logged_out) {
                 results.send_login_response(res, 401, 'Successful', null);
             }).catch(function(error){
                 results.send_login_response(res, 401, 'Successful', null);
@@ -217,7 +217,7 @@ function login_chat_by_token(req, res, session_token) {
 
 function login_chat_by_credentials(req, res) {
 
-    chat_handle.login(req.body['username'], req.body['password']).then(function([id, chat_token]) {
+    rocket_chat.login(req.body['username'], req.body['password'], configuration.chat_url).then(function([id, chat_token]) {
         if (chat_token != null) {
             res.set('Content-Type', 'text/html');
             res.send(`<script>

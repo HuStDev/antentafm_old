@@ -1,7 +1,7 @@
 const path = require('path');
-const configuration = require('.' + path.sep + 'configuration');
+const configuration = require(__dirname + path.sep + 'configuration');
+const security = require(__dirname + path.sep + 'security');
 
-const crypto = require('crypto');
 const jwt = require("jsonwebtoken");
 
 //-----------------------------------------------------------------------------
@@ -11,7 +11,7 @@ const jwt = require("jsonwebtoken");
 exports.create_session_token = function(user, password, id, token) {
     const payload = {
         user: user,
-        password: this.encode(password),
+        password: security.encodeAes256(password, configuration.jwt_secret_key),
         id: id,
         token: token
     };
@@ -43,42 +43,8 @@ exports.verify_session_token = function(session_token) {
     }
 }
 
-exports.encode = function(value) {
-    let iv = crypto.randomBytes(16);
-    let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(configuration.jwt_secret_key), iv);
-
-    let encrypted = cipher.update(value);
-    encrypted = Buffer.concat([encrypted, cipher.final()]);
-   
-    encrypted = iv.toString('hex') + ':' + encrypted.toString('hex');
-    return encrypted;
-}
-
-exports.decode = function(value) {
-    if (!value) {
-        return ''
-    }
-
-    let textParts = value.split(':');
-    let iv = Buffer.from(textParts.shift(), 'hex');
-
-    let encryptedText = Buffer.from(textParts.join(':'), 'hex');
-
-    let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(configuration.jwt_secret_key), iv);
-    let decrypted = decipher.update(encryptedText);
-   
-    decrypted = Buffer.concat([decrypted, decipher.final()]);
-   
-    return decrypted.toString();
-}
-
-exports.encode_sha256 = function(value) {
-    const hash = crypto.createHash('sha256').update(value).digest('hex');
-    return hash;
-}
-
 exports.check_registration_password = function(password_register) {
-    const decoded = this.decode(configuration.registration_password);
+    const decoded = security.decodeAes256(configuration.registration_password, configuration.jwt_secret_key);
     const res = decoded == password_register;
     return res;
 }
