@@ -37,10 +37,19 @@ function update_icecast_stats() {
             if ("source" in json_data["icestats"]) {
 				is_online = true;
 				
-				content = '';
+                content = '';
+                
+                var is_song_filled = false;
 
                 if ("title" in json_data["icestats"]["source"]) {
-                    content = "Song: " + json_data["icestats"]["source"]["title"];
+                    if (json_data["icestats"]["source"]["title"] != "") {
+                        content = "Song: " + json_data["icestats"]["source"]["title"];
+                        is_song_filled = true;
+                    }
+                }
+                
+                if (!is_song_filled && ("server_name" in json_data["icestats"]["source"])) {
+                    content = "Song: " + json_data["icestats"]["source"]["server_name"];
                 }
                 
                 if ("listeners" in json_data["icestats"]["source"] && "listener_peak" in json_data["icestats"]["source"]) {
@@ -55,7 +64,7 @@ function update_icecast_stats() {
         // add elements if stream wasn't online before
         if (true == is_online) {
             if (null == document.getElementById("id_live_stream")) {
-                const query = '?x_auth_token=' + sessionStorage.getItem('x_auth_token');
+                const query = '?x_auth_token=' + localStorage.getItem('antentafm_token');
                 create_new_audio_stream('rounded-lg', 'id_live_stream', 'id_live', 'https://stream.antentafm.ddnss.de/cast' + query, 'mp3', 'background-color:#dfdef6;');
             }
         }

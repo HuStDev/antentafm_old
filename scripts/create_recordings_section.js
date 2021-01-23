@@ -72,7 +72,7 @@ function create_new_audio_stream(class_name, id, id_root, source, type, style, p
 
 function create_recording_day(year, month, day, id_card_body) {
 
-	const query = '?x_auth_token=' + sessionStorage.getItem('x_auth_token');
+	const query = '?x_auth_token=' + localStorage.getItem('antentafm_token');
 	
 	const date = year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
 	const link_month = '/recordings/' + year + '/' + String(month).padStart(2, '0') + '/';
