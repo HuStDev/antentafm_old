@@ -15,7 +15,7 @@ function loginWithToken(response, session_token) {
 
 function loginWithCredentials(req, res) {
 
-    rocket_chat.login(req.body['username'], req.body['password'], configuration.chat_url).then(function([id, chat_token]) {
+    rocket_chat.loginWithCredentials(req.body['username'], req.body['password'], configuration.chat_url).then(function([id, chat_token]) {
         if (chat_token != null) {
             res.set('Content-Type', 'text/html');
             res.send(`<script>

@@ -55,12 +55,33 @@ app.use('/scripts', express.static('.' + path.sep + 'scripts'), serve('.' + path
 //-----------------------------------------------------------------------------
 // Root
 app.get('/', function (request, response) {  
-    if (session_handle.verify_session_token(request.query['x_auth_token'])) {
-        response.set('Content-Type', 'text/html');
-        fs.createReadStream('index.html').pipe(response);
+    const session_data = session_handle.verify_session_token(request.query['x_auth_token']);
+    if (null != session_data) {
+        rocket_chat.loginWithToken(session_data['token'], configuration.chat_url).then(function([id, token]) {
+            response.set('Content-Type', 'text/html');
+            fs.createReadStream('index.html').pipe(response);
+        }).catch(function(error_message){
+            return response.redirect('/logout');
+        });
     } else {
-        return response.redirect('/login');
+        return response.redirect('/logout');
     }
+});
+
+//-----------------------------------------------------------------------------
+// Login
+app.get('/logout', function (request, response) {
+    response.set('Content-Type', 'text/html');
+    fs.createReadStream('logout.html').pipe(response);
+});
+
+app.post('/logout', function (request, response) {
+    const session_data = session_handle.verify_session_token(request.body['x_auth_token']);
+    rocket_chat.logout(session_data['id'], session_data['token'], configuration.chat_url).then(function(has_logged_out) {
+        //
+    }).catch(function(error){
+        //
+    })
 });
 
 //-----------------------------------------------------------------------------

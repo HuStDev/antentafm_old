@@ -10,11 +10,33 @@ const security = require(__dirname + path.sep + 'security');
  * @param {String} password Password of the user
  * @param {String} url      Url of the Rocket.Chat server instance
  */
-async function login(user, password, url) {
+async function loginWithCredentials(user, password, url) {
     try {
         const response = await axios.post(url + '/api/v1/login', {
             username: user,
             password: password
+        })
+        if (response.data.status == 'success') {
+            return [response.data.data.userId, response.data.data.authToken];
+        } else {
+            throw 'Login unexpected error'
+        }
+    } catch (error) {
+        throw error.response.data.message;
+    }
+}
+
+/**
+ * Login to a Rocket.Chat server.
+ * If login is successfull, an array [UserId, SessionToken] is returned.
+ * Otherwise an exception with an error message is thrown.
+ * @param {String} token    Session token that shall be used for login
+ * @param {String} url      Url of the Rocket.Chat server instance
+ */
+async function loginWithToken(token, url) {
+    try {
+        const response = await axios.post(url + '/api/v1/login', {
+            resume: token
         })
         if (response.data.status == 'success') {
             return [response.data.data.userId, response.data.data.authToken];
@@ -121,7 +143,8 @@ function generateHeader(user_id, session_token) {
     return header_informations;
 }
 
-module.exports.login = login;
+module.exports.loginWithCredentials = loginWithCredentials;
+module.exports.loginWithToken = loginWithToken;
 module.exports.logout = logout;
 module.exports.update = update;
 module.exports.register = register;

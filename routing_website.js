@@ -7,7 +7,12 @@ const configuration = require('.' + path.sep + 'configuration');
 function loginWithToken(response, token) {
     const session_data = session_handle.verify_session_token(token);
     if (null != session_data) {
-        results.send_login_response(response, 200, '', token);
+        rocket_chat.loginWithToken(session_data['token'], configuration.chat_url).then(function([id, token]) {
+            const session_token = session_handle.create_session_token(id, token);
+            results.send_login_response(response, 200, 'Successful', session_token);
+        }).catch(function(error_message){
+            results.send_login_response(response, 401, String(error_message), null);
+        });
     } else {
         results.send_login_response(response, 401, 'Invalid session token', null);
     }
@@ -20,14 +25,14 @@ function loginWithCredentials(request, response) {
     } else if ('register' == action) {
         register(response, request.body['username'], request.body['password'], request.body['password_register']);
     } else if ('password_change' == action) {
-        change_password(response, request.body['username'], request.body['password'], request.body['password_old']);
+        changePassword(response, request.body['username'], request.body['password'], request.body['password_old']);
     } else {
-        handle_unexpected_request(response);
+        results.send_login_response(response, 401, 'unexpected response', null);
     }
 }
 
 function login(response, user, password) {
-    rocket_chat.login(user, password, configuration.chat_url).then(function([id, token]) {
+    rocket_chat.loginWithCredentials(user, password, configuration.chat_url).then(function([id, token]) {
         const session_token = session_handle.create_session_token(id, token);
         results.send_login_response(response, 200, 'Successful', session_token);
     }).catch(function(error_message){
@@ -51,7 +56,7 @@ function register(response, user, password, password_register) {
 }
 
 function changePassword(response, user, password, password_old) {
-    rocket_chat.login(user, password_old, configuration.chat_url).then(function([id, token]){
+    rocket_chat.loginWithCredentials(user, password_old, configuration.chat_url).then(function([id, token]){
         rocket_chat.update(password, password_old, id, token, configuration.chat_url).then(function(has_changed){
             rocket_chat.logout(id, token, configuration.chat_url).then(function(has_logged_out) {
                 results.send_login_response(response, 401, 'Successful', null);
