@@ -8,10 +8,8 @@ const jwt = require("jsonwebtoken");
 // exported functions
 //-----------------------------------------------------------------------------
 
-exports.create_session_token = function(user, password, id, token) {
+exports.create_session_token = function(id, token) {
     const payload = {
-        user: user,
-        password: security.encodeAes256(password, configuration.jwt_secret_key),
         id: id,
         token: token
     };
@@ -33,7 +31,7 @@ exports.verify_session_token = function(session_token) {
         const datetime = Date.now() / 1000;
         const is_expired = datetime > decoded['exp'];
 
-        if (decoded['exp'] && !is_expired) {
+        if (decoded['id'] && decoded['token'] && !is_expired) {
             return decoded;
         } else {
             return null;

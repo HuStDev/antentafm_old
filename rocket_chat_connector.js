@@ -34,7 +34,7 @@ async function login(user, password, url) {
  * @param {String} session_token    Token for current session of user that shall be ended
  * @param {String} url              Url of the Rocket.Chat server instance
  */
-async function logout(id, token, url) {
+async function logout(user_id, session_token, url) {
     try {
         const response = await axios.post(url + '/api/v1/logout', {}, generateHeader(user_id, session_token))
         if (response.data.status == 'success') {
