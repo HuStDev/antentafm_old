@@ -37,7 +37,7 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-                <a class="nav-link" href="#id_modal_version" data-toggle="modal" data-target="#id_modal_version">v3.2.2</a>
+                <a class="nav-link" href="#id_modal_version" data-toggle="modal" data-target="#id_modal_version">v3.3.0</a>
             </li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -63,102 +63,124 @@
             document.getElementById('id_link_stream').href = 'https://stream.antentafm.ddnss.de/cast?x_auth_token=' + localStorage.getItem('antentafm_token');
         
             function logout() {
-                window.location.href = '/logout';
+                const post_data = {
+                    x_auth_token : localStorage.getItem('antentafm_token')
+                };
+
+                $.ajax(
+                {
+                    url : window.location.origin + '/logout',
+                    type : "POST",
+                    data : post_data
+                });
+
+                localStorage.removeItem('antentafm_token'); 
+                window.location.href = '/login';
             }
         </script>
     </div>
-
-    <!-- Modal -->
-    <div class="modal fade" id="id_modal_version" role="dialog">
-        <div class="modal-dialog modal-dialog-scrollable">
-            <!-- Modal content-->
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Versionshistorie</h4>
-                </div>
-                <div class="modal-body">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <h6>3.2.2 - 2021-01-27</h6>
-                            Verbesserungen<br>
-                            - FAQs zu Direktlinks hinzugefuegt<br>
-                            - nach Login auf Website sollte automatischer Login zu Rocket.Chat immer automatisiert klappen<br>
-                            Known Bugs<br>
-                            - Direktlink zu Replays funktioniert nicht<br>
-                        </li>
-                        <li class="list-group-item">
-                            <h6>3.2.1 - 2021-01-22</h6>
-                            Verbesserungen<br>
-                            - Navbar ist jetzt immer im Vordergrund<br>
-                            - Auswertung Radio-Stream-Informationen, wenn kein dedizierte Song gesetzt wurde<br>
-                            Fixed Bugs<br>
-                            - Session-Token wurde nicht "persistent" im LocalStorage gespeichert,
-                                wodurch man sich nach jeder Browser-Session neu anmelden musste<br>
-                            Known Bugs<br>
-                            - Direktlink zu Replays funktioniert nicht<br>
-                        </li>
-                        <li class="list-group-item">
-                            <h6>3.2.0 - 2021-01-21</h6>
-                            New Features<br>
-                            - Navbar am oberen Bildschrimrand mit folgenden Informationen<br>
-                            + Direktlinks u.a. zu Chat, Stream<br>
-                            + Anzeige aktueller Radio-Streaminformationen<br>
-                            + Logout Button zum Abmelden der Session
-                            Verbesserungen<br>
-                            - Zeit der Gueltigkeit der aktuellen Session wurde auf eine Woche erhoeht<br>
-                            Known Bugs<br>
-                            - Direktlink zu Replays funktioniert nicht<br>
-                        </li>
-                        <li class="list-group-item">
-                            <h6>3.1.2 - 2021-01-20</h6>
-                            Verbesserungen<br>
-                            - Beschreibungen auf Login-Seite angepasst<br>
-                            Fixed Bugs<br>
-                            - Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
-                            Known Bugs<br>
-                            - Direktlink zu Replays funktioniert nicht<br>
-                        </li>
-                        <li class="list-group-item">
-                            <h6>3.1.1 - 2021-01-18</h6>
-                            Fixed Bugs<br>
-                            - Replays aktuell nicht abrufbar<br>
-                            Known Bugs<br>
-                            - Direktlink zu Replays funktioniert nicht<br>
-                            - Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
-                        </li>
-                        <li class="list-group-item">
-                            <h6>3.1.0 - 2021-01-17</h6>
-                            New Features<br>
-                            - Umsetllung Nutzerdatenbank - wird zentral von Rocket.Chat Instanz verwalten<br>
-                            - Version Historie auch im Login-Screen verfuegbar<br>
-                            Fixed Bugs<br>
-                            - Passwortwechsel funktioniert aktuell nicht<br>
-                            Known Bugs<br>
-                            - Replays aktuell nicht abrufbar<br>
-                            - Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
-                        </li>
-                        <li class="list-group-item">
-                            <h6>3.0.0 - 2021-01-15</h6>
-                            New Features<br>
-                            - ein zentraler und automatischer Login fuer alle drei Systeme (keine Mehrfachanmeldungen mehr auf Website, Radiostream und Rocket.Chat)<br>
-                            - Radio Stream ist geschuetzt und nur mit gueltiger User/Password-Kombination erreichbar<br>
-                            - zentrales Nutzerverwaltungssystem (ein Nutzer und Password) fuer Website, Radiostream und Rocket.Chat<br>
-                            - Backend wurde  komplett neu mit NodeJS umgesetzt (fuer Nutzerverwaltung, APIs, etc)<br>
-                            Known Bugs<br>
-                            - Passwortwechsel funktioniert aktuell nicht<br>
-                            - Replays aktuell nicht abrufbar<br>
-                            - Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
-                        </li>
-                    </ul>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
-                </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal fade" id="id_modal_version" role="dialog">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Versionshistorie</h4>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <h6>3.3.0 - 2021-01-29</h6>
+                        Anpassungen<br>
+                        - Moeglichkeit des Standardpassworts bei Login ist entfallen. Ab sofort muessen eigene Passwoerter verwendet werden.<br>
+                        Fixed Bugs<br>
+                        - nach klick auf Versionshistorie "friert" Website nicht mehr ein (grauer Schleier)<br>
+                        - logout funktionierte nicht mehr<br>
+                        Known Bugs<br>
+                        - Direktlink zu Replays funktioniert nicht<br>
+                        - es wurde bei jedem Neuladen der Website ein Logout durchgefuehrt<br>
+                    </li>
+                    <li class="list-group-item">
+                        <h6>3.2.2 - 2021-01-27</h6>
+                        Verbesserungen<br>
+                        - FAQs zu Direktlinks hinzugefuegt<br>
+                        - nach Login auf Website sollte automatischer Login zu Rocket.Chat immer automatisiert klappen<br>
+                        Known Bugs<br>
+                        - Direktlink zu Replays funktioniert nicht<br>
+                    </li>
+                    <li class="list-group-item">
+                        <h6>3.2.1 - 2021-01-22</h6>
+                        Verbesserungen<br>
+                        - Navbar ist jetzt immer im Vordergrund<br>
+                        - Auswertung Radio-Stream-Informationen, wenn kein dedizierte Song gesetzt wurde<br>
+                        Fixed Bugs<br>
+                        - Session-Token wurde nicht "persistent" im LocalStorage gespeichert,
+                            wodurch man sich nach jeder Browser-Session neu anmelden musste<br>
+                        Known Bugs<br>
+                        - Direktlink zu Replays funktioniert nicht<br>
+                    </li>
+                    <li class="list-group-item">
+                        <h6>3.2.0 - 2021-01-21</h6>
+                        New Features<br>
+                        - Navbar am oberen Bildschrimrand mit folgenden Informationen<br>
+                        + Direktlinks u.a. zu Chat, Stream<br>
+                        + Anzeige aktueller Radio-Streaminformationen<br>
+                        + Logout Button zum Abmelden der Session
+                        Verbesserungen<br>
+                        - Zeit der Gueltigkeit der aktuellen Session wurde auf eine Woche erhoeht<br>
+                        Known Bugs<br>
+                        - Direktlink zu Replays funktioniert nicht<br>
+                    </li>
+                    <li class="list-group-item">
+                        <h6>3.1.2 - 2021-01-20</h6>
+                        Verbesserungen<br>
+                        - Beschreibungen auf Login-Seite angepasst<br>
+                        Fixed Bugs<br>
+                        - Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
+                        Known Bugs<br>
+                        - Direktlink zu Replays funktioniert nicht<br>
+                    </li>
+                    <li class="list-group-item">
+                        <h6>3.1.1 - 2021-01-18</h6>
+                        Fixed Bugs<br>
+                        - Replays aktuell nicht abrufbar<br>
+                        Known Bugs<br>
+                        - Direktlink zu Replays funktioniert nicht<br>
+                        - Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
+                    </li>
+                    <li class="list-group-item">
+                        <h6>3.1.0 - 2021-01-17</h6>
+                        New Features<br>
+                        - Umsetllung Nutzerdatenbank - wird zentral von Rocket.Chat Instanz verwalten<br>
+                        - Version Historie auch im Login-Screen verfuegbar<br>
+                        Fixed Bugs<br>
+                        - Passwortwechsel funktioniert aktuell nicht<br>
+                        Known Bugs<br>
+                        - Replays aktuell nicht abrufbar<br>
+                        - Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
+                    </li>
+                    <li class="list-group-item">
+                        <h6>3.0.0 - 2021-01-15</h6>
+                        New Features<br>
+                        - ein zentraler und automatischer Login fuer alle drei Systeme (keine Mehrfachanmeldungen mehr auf Website, Radiostream und Rocket.Chat)<br>
+                        - Radio Stream ist geschuetzt und nur mit gueltiger User/Password-Kombination erreichbar<br>
+                        - zentrales Nutzerverwaltungssystem (ein Nutzer und Password) fuer Website, Radiostream und Rocket.Chat<br>
+                        - Backend wurde  komplett neu mit NodeJS umgesetzt (fuer Nutzerverwaltung, APIs, etc)<br>
+                        Known Bugs<br>
+                        - Passwortwechsel funktioniert aktuell nicht<br>
+                        - Replays aktuell nicht abrufbar<br>
+                        - Rocket.Chat zeigt bei Login zwischenzeitlich Radiowebsite<br>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Schließen</button>
             </div>
         </div>
     </div>
-</nav>
-  
+</div>
 
 <div class="container-fluid rounded-lg" style="background-color:#dfdef6;" id="id_chat">
     <h3>Chat</h3>
@@ -167,10 +189,13 @@
             <iframe id="id_chat_frame" src="https://chat.antentafm.ddnss.de/channel/antentafm?layout=embedded"></iframe>
             <script>
                 window.addEventListener('message', function(e) {
+                    console.log("# ", e.data.eventName);
                     if (e.data.eventName == 'startup') {
                         const post_data = {
                             x_auth_token : localStorage.getItem('antentafm_token')
                         };
+
+                        console.log("## ", localStorage.getItem('antentafm_token'));
 
                         $.ajax(
                         {

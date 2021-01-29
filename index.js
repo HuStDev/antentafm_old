@@ -64,7 +64,7 @@ app.get('/', function (request, response) {
             return response.redirect('/logout');
         });
     } else {
-        return response.redirect('/logout');
+        return response.redirect('/login');
     }
 });
 
