@@ -39,7 +39,7 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-                <a class="nav-link" href="#id_modal_version" data-toggle="modal" data-target="#id_modal_version">v3.3.0</a>
+                <a class="nav-link" href="#id_modal_version" data-toggle="modal" data-target="#id_modal_version">v3.3.1</a>
             </li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -97,6 +97,14 @@
             </div>
             <div class="modal-body">
                 <ul class="list-group">
+                    <li class="list-group-item">
+                        <h6>3.3.1 - 2021-02-01</h6>
+                        Verbesserungen<br>
+                        - Logging-Features wurden client- und serverseitig implementiert<br>
+                        - Darstellung Chatverlauf auf Mobilgeraeten verbessert<br> 
+                        Known Bugs<br>
+                        - Direktlink zu Replays funktioniert nicht<br>
+                    </li>
                     <li class="list-group-item">
                         <h6>3.3.0 - 2021-01-29</h6>
                         Anpassungen<br>
@@ -191,9 +199,12 @@
 <div class="container-fluid rounded-lg" style="background-color:#dfdef6;" id="id_chat">
     <h3>Chat</h3>
     <div class="row mb-3" style="background-color:#dfdef6;" id="id_live_stats">
-        <div class="col-sm-10 themed-grid-col embed-responsive embed-responsive-21by9" style="background-color:#dfdef6;">
+        <div class="col-sm-10 themed-grid-col" style="background-color:#dfdef6;" id="div_chat_rocket">
             <iframe id="id_chat_frame" src="https://chat.antentafm.ddnss.de/channel/antentafm?layout=embedded"></iframe>
             <script>
+                document.getElementById("id_chat_frame").width = screen.width;
+                document.getElementById("id_chat_frame").height = screen.height;
+
                 window.addEventListener('message', function(e) {
                     logTrace("index.html -> eventListener msg: " + e.data.eventName);
                     if (e.data.eventName == 'startup') {
@@ -228,7 +239,7 @@
             </script>
         </div>
         
-        <div class="col-sm-2 themed-grid-col" style="background-color:#dfdef6;">
+        <div class="col-sm-2 themed-grid-col" style="background-color:#dfdef6;" id="div_chat_weather">
             <p>
                 <a class="weatherwidget-io" href="https://forecast7.com/de/50d8312d92/chemnitz/" data-label_1="CHEMNITZ" data-label_2="" data-icons="Climacons Animated" data-days="3" data-theme="pure" data-basecolor="#dfdef6" >CHEMNITZ WETTER</a>
             </p>
