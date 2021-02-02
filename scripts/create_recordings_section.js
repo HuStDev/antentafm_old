@@ -123,7 +123,7 @@ function create_recording_day(year, month, day, id_card_body) {
 			
 function create_recordings() {
 	const id_accordion = "accordion_idx";
-	create_new_div("accordion", id_accordion, "id_replay", "background-color:#dfdef6;");
+	create_new_div("accordion rounded-lg", id_accordion, "id_replay", "background-color:#dfdef6;");
 	
 	const id_card = "card_idx";
 	create_new_div("card", id_card, id_accordion, "background-color:#dfdef6;");
