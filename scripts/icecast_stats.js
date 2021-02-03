@@ -24,6 +24,18 @@ function create_new_audio_stream(class_name, id, id_root, source, type, style, p
     sound.autoplay  = 'autoplay';
     sound.className = class_name;
     sound.style = style;
+
+    const volume_level = localStorage.getItem('antentafm_volume');
+    if (volume_level) {
+        sound.volume = volume_level;
+    } else {
+        sound.volume = 0.5;
+    }
+
+    sound.onvolumechange = function() {
+        localStorage.setItem('antentafm_volume', this.volume)
+    };
+
     document.getElementById(id_root).appendChild(sound);
 }
         

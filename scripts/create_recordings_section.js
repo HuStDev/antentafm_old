@@ -55,21 +55,6 @@ function create_new_audio_record(id, id_root, source, type, preload = 'meta') {
 	}
 }
 
-function create_new_audio_stream(class_name, id, id_root, source, type, style, preload = 'auto') {
-	if (null == document.getElementById(id)) {
-		var sound = document.createElement("audio");
-		sound.id       = id;
-		sound.controls = 'controls';
-		sound.src      = source;
-		sound.type     = 'audio/' + type;
-		sound.preload  = preload;
-		sound.autoplay  = 'autoplay';
-		sound.className = class_name;
-		sound.style = style;
-		document.getElementById(id_root).appendChild(sound);
-	}
-}
-
 function create_recording_day(year, month, day, id_card_body) {
 
 	const query = '?x_auth_token=' + localStorage.getItem('antentafm_token');
