@@ -12,6 +12,9 @@ const Logger = require(__dirname + path.sep + 'logger');
 var logger = new Logger().getInstance();
 logger.setLogLevel(Logger.log_level.no);
 
+const Song = require(__dirname + path.sep + 'song');
+var song = new Song().getInstance();
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
@@ -80,6 +83,21 @@ app.get('/', function (request, response) {
 
         return response.redirect('/login');
     }
+});
+
+//-----------------------------------------------------------------------------
+// Song
+app.post('/song_get', function (request, response) {
+    const s = song.getSong();
+    if (null == s) {
+        return response.sendStatus(401);
+    } else {
+        return response.status(200).send({'song': s});
+    }
+});
+
+app.post('/song_set', function (request, response) {
+    song.setSong(request.body['song']);
 });
 
 //-----------------------------------------------------------------------------

@@ -28,7 +28,7 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-                <a class="nav-link" href="#id_modal_version" data-toggle="modal" data-target="#id_modal_version">v3.3.3</a>
+                <a class="nav-link" href="#id_modal_version" data-toggle="modal" data-target="#id_modal_version">v3.3.4</a>
             </li>
         </ul>
     </div>
@@ -45,12 +45,18 @@
             <div class="modal-body">
                 <ul class="list-group">
                     <li class="list-group-item">
-                        <h6>3.3.3- 2021-02-04</h6>
+                        <h6>3.3.4 - 2021-02-08</h6>
+                        Verbesserungen<br>
+                        - Nutzername wird im Browser localStorage fuer das naechste Login gespeichert<br>
+                        - Songinformation in Navbar kann ueber Server-API gesetzt werden<br>
+                    </li>
+                    <li class="list-group-item">
+                        <h6>3.3.3 - 2021-02-04</h6>
                         Verbesserungen<br>
                         - Lautstaerke wird initial auf 50% gesetzt und zuletzt eingestelltes Volume wird fuer naechsten Besuch gespeichert<br>
                     </li>
                     <li class="list-group-item">
-                        <h6>3.3.2- 2021-02-02</h6>
+                        <h6>3.3.2 - 2021-02-02</h6>
                         Verbesserungen<br>
                         - Seitendarstellung auf Mobilgeraeten verbessert, damit Seite und Chat besser scrollbar sind<br>
                         Fixed Bugs<br>
@@ -248,6 +254,11 @@
         function set_default_form_values() {
             document.getElementById(id_checkbox_register).checked = false;
             document.getElementById(id_checkbox_password_change).checked = false;
+
+            const user = localStorage.getItem('antentafm_user');
+            if (user) {
+                document.getElementById(id_form_username).value = user;
+            } 
         }
 
         function update_login_form() {
@@ -324,6 +335,8 @@
             };
 
             logTrace("login.html -> post login");
+
+            localStorage.setItem('antentafm_user', document.getElementById(id_form_username).value);
 
             $.ajax(
             {

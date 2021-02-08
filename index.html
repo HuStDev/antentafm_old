@@ -39,7 +39,7 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-                <a class="nav-link" href="#id_modal_version" data-toggle="modal" data-target="#id_modal_version">v3.3.3</a>
+                <a class="nav-link" href="#id_modal_version" data-toggle="modal" data-target="#id_modal_version">v3.3.4</a>
             </li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -98,12 +98,18 @@
             <div class="modal-body">
                 <ul class="list-group">
                     <li class="list-group-item">
-                        <h6>3.3.3- 2021-02-04</h6>
+                        <h6>3.3.4 - 2021-02-08</h6>
+                        Verbesserungen<br>
+                        - Nutzername wird im Browser localStorage fuer das naechste Login gespeichert<br>
+                        - Songinformation in Navbar kann ueber Server-API gesetzt werden<br>
+                    </li>
+                    <li class="list-group-item">
+                        <h6>3.3.3 - 2021-02-04</h6>
                         Verbesserungen<br>
                         - Lautstaerke wird initial auf 50% gesetzt und zuletzt eingestelltes Volume wird fuer naechsten Besuch gespeichert<br>
                     </li>
                     <li class="list-group-item">
-                        <h6>3.3.2- 2021-02-02</h6>
+                        <h6>3.3.2 - 2021-02-02</h6>
                         Verbesserungen<br>
                         - Seitendarstellung auf Mobilgeraeten verbessert, damit Seite und Chat besser scrollbar sind<br>
                         Fixed Bugs<br>
@@ -222,14 +228,36 @@
     <h3>Chat</h3>
     <div class="row mb-3" style="background-color:#dfdef6;" id="id_live_stats">
         <div class="col-sm-10 themed-grid-col" style="background-color:#dfdef6;" id="div_chat_rocket">
-            <iframe id="id_chat_frame" class="rounded-lg" src="https://chat.antentafm.ddnss.de/channel/antentafm?layout=embedded"></iframe>
+            <iframe id="id_chat_frame" class="rounded-lg"></iframe>
             <script>
-                document.getElementById("id_chat_frame").width = screen.width;
-                document.getElementById("id_chat_frame").height = screen.height;
+                if (screen.width > 1000) {
+                    document.getElementById("id_chat_frame").width = parseInt((0.8 * screen.width) / 2) * 2;
+                    document.getElementById("id_chat_frame").src = "https://chat.antentafm.ddnss.de/channel/antentafm?layout=embedded";
+                } else {
+                    document.getElementById("id_chat_frame").width = parseInt((0.9 * screen.width) / 2) * 2;
+                    document.getElementById("id_chat_frame").src = "https://chat.antentafm.ddnss.de/channel/antentafm?layout=embedded";
+                }
+                document.getElementById("id_chat_frame").height = parseInt((0.8 * screen.height) / 2) * 2;
 
                 window.addEventListener('message', function(e) {
                     logTrace("index.html -> eventListener msg: " + e.data.eventName);
-                    if (e.data.eventName == 'startup') {
+
+                    if (e.data.eventName == 'new-message') {
+                        logTrace("index.html -> eventListener msg: " + e.data.data.msg);
+
+                        const post_data = {
+                            song : e.data.data.msg.replace('@Song', '')
+                        };
+
+                        logTrace("index.html -> eventListener post song");
+
+                        $.ajax(
+                        {
+                            url : window.location.origin + '/song_set',
+                            type : "POST",
+                            data : post_data 
+                        });
+                    } else if (e.data.eventName == 'startup') {
                         const post_data = {
                             x_auth_token : localStorage.getItem('antentafm_token')
                         };

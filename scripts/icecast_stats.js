@@ -60,18 +60,39 @@ function update_icecast_stats() {
                     }
                 }
                 
-                if (!is_song_filled && ("server_name" in json_data["icestats"]["source"])) {
-                    content = "Song: " + json_data["icestats"]["source"]["server_name"];
-                }
-                
-                if ("listeners" in json_data["icestats"]["source"] && "listener_peak" in json_data["icestats"]["source"]) {
-                    content = content +  " | Zuhörer (max): " + json_data["icestats"]["source"]["listeners"] + " (" + json_data["icestats"]["source"]["listener_peak"] + ")";    
+                if (!is_song_filled) {
+                    $.ajax(
+                    {
+                        url : window.location.origin + '/song_get',
+                        type : "POST",
+                        success: function(response) {
+                            content = "Song: " + response['song'];
+                            if ("listeners" in json_data["icestats"]["source"] && "listener_peak" in json_data["icestats"]["source"]) {
+                                content = content +  " | Zuhörer (max): " + json_data["icestats"]["source"]["listeners"] + " (" + json_data["icestats"]["source"]["listener_peak"] + ")";    
+                            }
+                            // update stats output fields
+                            document.getElementById("id_stream_status").innerHTML = content;  
+                        },
+                        error : function(response_header) {
+                            if (!is_song_filled && ("server_name" in json_data["icestats"]["source"])) {
+                                content = json_data["icestats"]["source"]["server_name"];
+                            }
+                            if ("listeners" in json_data["icestats"]["source"] && "listener_peak" in json_data["icestats"]["source"]) {
+                                content = content +  " | Zuhörer (max): " + json_data["icestats"]["source"]["listeners"] + " (" + json_data["icestats"]["source"]["listener_peak"] + ")";    
+                            }
+                            // update stats output fields
+                            document.getElementById("id_stream_status").innerHTML = content;
+                        }
+                    });
+                } else {
+                    if ("listeners" in json_data["icestats"]["source"] && "listener_peak" in json_data["icestats"]["source"]) {
+                        content = content +  " | Zuhörer (max): " + json_data["icestats"]["source"]["listeners"] + " (" + json_data["icestats"]["source"]["listener_peak"] + ")";    
+                    }
+                    // update stats output fields
+                    document.getElementById("id_stream_status").innerHTML = content;    
                 }
             }
-        }
-        
-        // update stats output fields
-        document.getElementById("id_stream_status").innerHTML = content;           
+        }         
         
         // add elements if stream wasn't online before
         if (true == is_online) {
