@@ -98,6 +98,13 @@
             <div class="modal-body">
                 <ul class="list-group">
                     <li class="list-group-item">
+                        <h6>3.3.5 - 2021-03-xx</h6>
+                        Verbesserungen<br>
+                        - <br>
+                        Fixed Bugs<br>
+                        - Songanzeige sollte jetzt stabil den aktuell gespielten Song anzeigen<br>
+                    </li>
+                    <li class="list-group-item">
                         <h6>3.3.4 - 2021-02-08</h6>
                         Verbesserungen<br>
                         - Nutzername wird im Browser localStorage fuer das naechste Login gespeichert<br>
@@ -245,18 +252,20 @@
                     if (e.data.eventName == 'new-message') {
                         logTrace("index.html -> eventListener msg: " + e.data.data.msg);
 
-                        const post_data = {
-                            song : e.data.data.msg.replace('@Song', '')
-                        };
+                        if (String(e.data.data.msg).includes('@Song')) {
+                            const post_data = {
+                                song : e.data.data.msg.replace('@Song', '')
+                            };
 
-                        logTrace("index.html -> eventListener post song");
+                            logTrace("index.html -> eventListener post song");
 
-                        $.ajax(
-                        {
-                            url : window.location.origin + '/song_set',
-                            type : "POST",
-                            data : post_data 
-                        });
+                            $.ajax(
+                            {
+                                url : window.location.origin + '/song_set',
+                                type : "POST",
+                                data : post_data 
+                            });
+                        }
                     } else if (e.data.eventName == 'startup') {
                         const post_data = {
                             x_auth_token : localStorage.getItem('antentafm_token')
