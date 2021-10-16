@@ -1,0 +1,106 @@
+<icecast>
+    <location>Earth</location>
+    <admin>hust@earth</admin>
+
+    <limits>
+        <clients>100</clients>
+        <sources>1</sources>
+        <!-- <queue-size>65536</queue-size> -->
+	<queue-size>102400</queue-size>
+        <client-timeout>30</client-timeout>
+        <header-timeout>30</header-timeout>
+        <source-timeout>30</source-timeout>
+        <burst-size>1024</burst-size>
+    </limits>
+
+    <authentication>
+        <!-- Sources log in with username 'source' -->
+        <source-password>yFRbxck5HNdZUJXPKa9DghoGtijr_A32</source-password>
+        <!-- Relays log in with username 'relay' -->
+        <relay-password>MgT36xsB5eZAhW8P9DY7oLCjFtcu-avk</relay-password>
+
+        <!-- Admin logs in with the username given below -->
+        <admin-user>admin</admin-user>
+        <admin-password>JgDcP8i2SXTamq5xtoZvW4UjAnY_wdV9</admin-password>
+    </authentication>
+
+    <hostname>hust-tune</hostname>
+
+    <!-- You may have multiple <listen-socket> elements -->
+    <listen-socket>
+        <port>8090</port>
+        <!-- <bind-address>127.0.0.1</bind-address> -->
+        <!-- <shoutcast-mount>/stream</shoutcast-mount> -->
+    </listen-socket>
+    <!-- <listen-socket>
+        <port>8443</port>
+        <ssl>1</ssl>
+    </listen-socket> -->
+
+
+    <http-headers>
+	<header name="Cache-control" value="no-cache" />
+        <header name="Access-Control-Allow-Origin" value="*" />
+        <header name="Access-Control-Allow-Headers" value="Origin, Accept, X-Requested-With, Content-Type, If-Modified-Since" />
+        <header name="Access-Control-Allow-Methods" value="GET, OPTIONS, HEAD" />
+   </http-headers>
+
+
+    <!-- Default settings for all mounts that don't have a specific <mount type="normal">.
+    -->
+    <mount type="default">
+	<mount-name>/cast</mount-name>
+        <public>1</public>
+       	<hidden>0</hidden>
+        <authentication type="url">
+            <option name="listener_add" value="https://radio.antentafm.ddnss.de/login_stream"/>
+            <option name="listener_remove" value="https://radio.antentafm.ddnss.de/login_stream"/>
+            <option name="auth_header" value="icecast-auth-user: 1"/>
+            <option name="timelimit_header" value="icecast-auth-timelimit:"/>
+            <option name="headers" value="x-pragma,x-token"/>
+            <option name="header_prefix" value="ClientHeader."/>
+        </authentication>
+
+    </mount>
+
+    <fileserve>1</fileserve>
+
+    <paths>
+        <!-- basedir is only used if chroot is enabled -->
+        <basedir>/usr/share/icecast2</basedir>
+
+        <!-- Note that if <chroot> is turned on below, these paths must both
+             be relative to the new root, not the original root -->
+        <logdir>/var/log/icecast2</logdir>
+        <webroot>/usr/share/icecast2/web</webroot>
+        <adminroot>/usr/share/icecast2/admin</adminroot>
+        <!-- <pidfile>/usr/share/icecast2/icecast.pid</pidfile> -->
+
+        <alias source="/" destination="/status.xsl"/>
+        <ssl-certificate>/usr/share/icecast2/icecast2.pem</ssl-certificate>
+    </paths>
+
+    <logging>
+        <accesslog>access.log</accesslog>
+        <errorlog>error.log</errorlog>
+        <!-- <playlistlog>playlist.log</playlistlog> -->
+        <loglevel>3</loglevel> <!-- 4 Debug, 3 Info, 2 Warn, 1 Error -->
+        <logsize>10000</logsize> <!-- Max size of a logfile -->
+        <!-- If logarchive is enabled (1), then when logsize is reached
+             the logfile will be moved to [error|access|playlist].log.DATESTAMP,
+             otherwise it will be moved to [error|access|playlist].log.old.
+             Default is non-archive mode (i.e. overwrite)
+        -->
+        <!-- <logarchive>1</logarchive> -->
+    </logging>
+
+    <security>
+        <chroot>0</chroot>
+        <!--
+        <changeowner>
+            <user>nobody</user>
+            <group>nogroup</group>
+        </changeowner>
+        -->
+    </security>
+</icecast>
